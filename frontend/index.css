@@ -1,0 +1,85 @@
+.page {
+  background-color: #eee;
+  padding: 1em;
+  height: calc(100vh - 2em);
+  width: calc(100vw - 2em);
+}
+
+.page p {
+  margin-block: 0;
+}
+
+.flexCol {
+  display: flex;
+  flex-direction: column;
+}
+
+.flexRow {
+  display: flex;
+  flex-direction: row;
+}
+
+.flexCenter {
+  justify-content: center;
+  align-items: center;
+}
+
+.titleDiv {
+  width: 100%;
+  margin-bottom: 50px;
+}
+
+.titleDiv > p {
+}
+
+body {
+  margin: 0;
+  font-family: Calibri, 'Trebuchet MS', sans-serif;
+
+}
+
+
+@media screen and (orientation: landscape) {
+  .titleDiv > p {
+    font-size: 32px;
+  }
+}
+
+@media screen and (orientation: portrait) {
+  .titleDiv > p {
+    font-size: 24px;
+  }
+  
+}
+
+.main-options {
+  width: 50%;
+  padding: 0px 25%;
+  align-items: center;
+}
+
+.main-link {
+  display: flex;
+  text-decoration: none;
+  width: 65%;
+  margin-bottom: 50px;
+  background-color: #333;
+  border-radius: 60px;
+  padding: 30px;
+  color: #eee;
+  font-size: 24px;
+}
+
+.main-link:hover {
+  padding: 28px;
+}
+
+#game-link:hover {
+  border: solid 2px #c22;
+  color: #c22;
+}
+
+#editor-link:hover {
+  border: solid 2px #2cc;
+  color: #2cc;
+}
