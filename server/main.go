@@ -122,7 +122,7 @@ func main() {
             }
 
             set_room_state(room_id_32, pb.RoomState_GENERATING);
-            hub.broadcast <- Envelope{message: []byte("GEN"), sender_id: 0, room_id: room_id_32}
+            hub.broadcast <- Envelope{message: []byte("{\"type\":\"RoomStateChange\", \"newState\":\"GENERATING\"}"), sender_id: 0, room_id: room_id_32}
 
             // the id is just 000 since we don't need an id anctually 
             cmd := exec.Command("python3", "../scene_recreation/run_dust3r.py", "--images_folder", dname, "--dust3r_path", "../scene_recreation/dust3r", "--out_dir", dnameobj, "--id", "0")
@@ -130,7 +130,7 @@ func main() {
             log.Println(string(out))
             
             set_room_state(room_id_32, pb.RoomState_LOBBY);
-            hub.broadcast <- Envelope{message: []byte("LBY"), sender_id: 0, room_id: room_id_32}
+            hub.broadcast <- Envelope{message: []byte("{\"type\":\"RoomStateChange\", \"newState\":\"LOBBY\"}"), sender_id: 0, room_id: room_id_32}
 
             if err != nil {
                 http.Error(w, "Couldn't generate image. WOMP WOMP, cry about it", http.StatusInternalServerError)

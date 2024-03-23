@@ -14,7 +14,10 @@ const existingRoomsDiv = document.getElementById("existingRooms")
 let socket = null
 //container.setAttribute("hidden", true)
 startGameButton.onclick = () => {
-	socket.send("Starting game")
+	socket.send(JSON.stringify({
+        msgType: "RoomStateChange",
+        newState: "RACING"
+    }))
 	sendIt()
 }
 joinLobbyButton.onclick = joinLobby
@@ -44,6 +47,8 @@ var physicsWorld;
 
 var syncList = [];
 var time = 0;
+var frameNum = 0;
+var username = "nick";
 
 // Keybord actions
 var actions = {};
@@ -53,6 +58,8 @@ var keysActions = {
 	"KeyA":'left',
 	"KeyD":'right'
 };
+
+const userMap = new Map();
 
 // - Functions -
 
@@ -368,6 +375,7 @@ function createVehicle(pos, quat) {
 			wheelMeshes[i].position.set(p.x(), p.y(), p.z());
 			wheelMeshes[i].quaternion.set(q.x(), q.y(), q.z(), q.w());
 		}
+
 		//console.log(`${p.x()} ${p.y()} ${p.z()}`)
 
 		tm = vehicle.getChassisWorldTransform();
@@ -375,6 +383,30 @@ function createVehicle(pos, quat) {
 		q = tm.getRotation();
 		chassisMesh.position.set(p.x(), p.y(), p.z());
 		chassisMesh.quaternion.set(q.x(), q.y(), q.z(), q.w());
+        
+        frameNum += 1;
+        if (frameNum % 30) {
+	       socket.send(JSON.stringify({
+               msgType: "PositionUpdate",
+               name: username,
+               position: {
+                   x: p.x(),
+                   y: p.y(),
+                   z: p.z()
+               },
+               rotation: {
+                   x: q.x(),
+                   y: q.y(),
+                   z: q.z(),
+                   w: q.w()
+               },
+               velocity: {
+                   x: vehicle.getForwardVector().x(),
+                   y: vehicle.getForwardVector().y(),
+                   z: vehicle.getForwardVector().z()
+               }
+           }))
+        }
 
 		camera.position.set(p.x(), p.y() + 1, p.z());
 		camera.quaternion.set(q.x(), q.y(), q.z(), q.w());
@@ -498,18 +530,45 @@ function sendIt() {
 
 function socketMessageHandler(e) {
 	console.log(e.data)
-	if (e.data === "Starting game") {
-		sendIt()
-	}
+    msgObj = JSON.parse(e.data)
+    switch (msgObj.msgType) {
+        case "RacerInfo":
+            newUsername = msgObj. name
+            if (!userMap.has(newUsername)) {
+	            socket.send(JSON.stringify({
+                    msgType: "RacerInfo",
+                    name: username
+                }))
+                userMap.set(newUsername, "idk"); /* can store user's car model or smth here */
+            }
+            break;
+        case "RoomStateChange":
+            switch (msgObj.newState) {
+                case "RACING":
+                    sendIt();
+                    break;
+            }
+            break;
+    }
 }
 
 
 async function joinRoom(roomID) {
-	socket = new WebSocket(`ws://localhost:8080/ws/${roomID}`)
-	socket.onmessage = socketMessageHandler
-	joinLobbyButton.disabled = true
-	startGameButton.disabled = false
-	existingRoomsDiv.style.display = "none"
+    if (username.length > 0) {
+	    socket = new WebSocket(`ws://localhost:8080/ws/${roomID}`)
+	    socket.onmessage = socketMessageHandler
+
+	    socket.send(JSON.stringify({
+            msgType: "RacerInfo",
+            name: username
+        }))
+
+        joinLobbyButton.disabled = true
+	    startGameButton.disabled = false
+	    existingRoomsDiv.style.display = "none"
+    } else {
+        alert("Please enter a username");
+    }
 
 }
 
