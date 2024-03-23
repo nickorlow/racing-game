@@ -1,7 +1,9 @@
 import sys
 import os
 
-sys.path.append("./dust3r")
+
+# goofy but wtv
+sys.path.append("../scene_recreation/dust3r")
 
 import numpy as np
 import os

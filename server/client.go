@@ -82,20 +82,13 @@ func (c *Client) writePump() {
 				return
 			}
 
-			w, err := c.conn.NextWriter(websocket.TextMessage)
-			if err != nil {
-				return
-			}
-            
-            // is this moronic?
-
-            log.Println(envelope.sender_id)
-            log.Println(c.id)
             if c.room_id == envelope.room_id && c.id != envelope.sender_id {
+			    w, err := c.conn.NextWriter(websocket.TextMessage)
+			    if err != nil {
+			    	return
+			    }
+                
 			    w.Write(message)
-            }
-
-
             n := len(c.send)
 			for i := 0; i < n; i++ {
 				w.Write(newline)
@@ -108,6 +101,9 @@ func (c *Client) writePump() {
 			if err := w.Close(); err != nil {
 				return
 			}
+            }
+
+
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
@@ -125,7 +121,7 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 	}
 
     id := strings.TrimPrefix(r.URL.Path, "/ws/")
-    room_id_long, err := strconv.ParseInt(id, 10, 32)
+    room_id_long, err := strconv.ParseUint(id, 10, 32)
 	if err != nil {
 		log.Println(err)
 		return
