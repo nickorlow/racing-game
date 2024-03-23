@@ -15,8 +15,22 @@
   </head>
   <body>
     <div id="startPopup">
-      <button id="joinLobby">Make Lobby</button>
-      <button id="startButton" disabled="true">Start Game</button>
+      <div id="usernameDiv">
+        <label>Username</label>
+        <input type="text" id="usernameInput"></input>
+        <button id="submitUsername">Done</button>
+      </div>
+      <div id="existingRooms">
+      </div>
+      <div id="makeLobbyDiv">
+        <label>New Lobby Name</label>
+        <input type="text" id="lobbyInput"></input>
+        <button id="makeLobby">Make Lobby</button>
+      </div>
+      <div id="gameInfo">
+        <p id="racers"></p>
+        <button id="startButton">Start Game</button>
+      </div>
     </div>
     <div id="container"><br /><br /><br /><br /><br />Tabletop Cars</div>
     <div id="speedometer">0.0 km/h</div>

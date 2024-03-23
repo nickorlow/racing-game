@@ -128,6 +128,16 @@ func main() {
 
 			dname := "./images_" + strconv.FormatUint(uint64(room_id_32), 10)
 			err = os.Mkdir(dname, 0700|os.ModeDir)
+            set_room_state(room_id_32, pb.RoomState_GENERATING);
+            hub.broadcast <- Envelope{message: []byte("{\"type\":\"RoomStateChange\", \"newState\":\"GENERATING\"}"), sender_id: 0, room_id: room_id_32}
+
+            // the id is just 000 since we don't need an id anctually 
+            cmd := exec.Command("python3", "../scene_recreation/run_dust3r.py", "--images_folder", dname, "--dust3r_path", "../scene_recreation/dust3r", "--out_dir", dnameobj, "--id", "0")
+            out, err := cmd.CombinedOutput()
+            log.Println(string(out))
+            
+            set_room_state(room_id_32, pb.RoomState_LOBBY);
+            hub.broadcast <- Envelope{message: []byte("{\"type\":\"RoomStateChange\", \"newState\":\"LOBBY\"}"), sender_id: 0, room_id: room_id_32}
 
 			dnameobj := "./obj_" + strconv.FormatUint(uint64(room_id_32), 10)
 			err = os.Mkdir(dnameobj, 0700|os.ModeDir)

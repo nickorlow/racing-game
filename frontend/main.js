@@ -5,14 +5,47 @@ import { PCDLoader } from 'three/addons/loaders/PCDLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const startGameButton = document.getElementById("startButton")
-const joinLobbyButton = document.getElementById("joinLobby")
+const submitUsernameButton = document.getElementById("submitUsername")
+const usernameInput = document.getElementById("usernameInput")
+const usernameDiv = document.getElementById("usernameDiv")
+const gameInfoDiv = document.getElementById("gameInfo")
+const racerList = document.getElementById("racers")
+gameInfoDiv.style.display = "none"
+const makeLobbyButton = document.getElementById("makeLobby")
+const makeLobbyDiv = document.getElementById("makeLobbyDiv")
+const makeLobbyInput = document.getElementById("lobbyInput")
+makeLobbyDiv.style.display = "none"
+let username = ""
+
 const startGameDiv = document.getElementById("startPopup")
 const container = document.getElementById( 'container' );
 const speedometer = document.getElementById( 'speedometer' );
+const existingRoomsDiv = document.getElementById("existingRooms")
+
 let socket = null
 //container.setAttribute("hidden", true)
-startGameButton.onclick = sendIt
-joinLobbyButton.onclick = joinLobby
+startGameButton.onclick = () => {
+	socket.send(JSON.stringify({
+        msgType: "RoomStateChange",
+        newState: "RACING"
+    }))
+	sendIt()
+}
+makeLobbyButton.onclick = makeLobby
+
+
+function submitUsernameAction() {
+	if (usernameInput.value.length > 0) {
+		findRooms()
+		makeLobbyDiv.style.display = "flex"
+		usernameDiv.style.display = "none"
+		username = usernameInput.value
+		console.log(username)
+
+	}
+}
+
+submitUsernameButton.onclick = submitUsernameAction
 
 //async function spinUp() {
 	//container.setAttribute("hidden", false)
@@ -39,6 +72,7 @@ var physicsWorld;
 
 var syncList = [];
 var time = 0;
+var frameNum = 0;
 
 // Keybord actions
 var actions = {};
@@ -49,6 +83,8 @@ var keysActions = {
 	"KeyD":'right'
 };
 
+const userMap = new Map();
+const vehicleMap = new Map();
 // - Functions -
 
 function initGraphics() {
@@ -178,7 +214,7 @@ function createBox(pos, quat, w, l, h, mass, friction, render = true) {
 	if (mass > 0) {
 		body.setActivationState(DISABLE_DEACTIVATION);
 		// Sync physics and graphics
-		function sync(dt) {
+		function sync(dt, nc) {
 			var ms = body.getMotionState();
 			if (ms) {
 				ms.getWorldTransform(TRANSFORM_AUX);
@@ -190,6 +226,7 @@ function createBox(pos, quat, w, l, h, mass, friction, render = true) {
 		}
 
 		syncList.push(sync);
+		syncListLocal.push(sync, true);
 	}
 }
 
@@ -209,7 +246,8 @@ function createChassisMesh(w, l, h) {
 	return mesh;
 }
 
-function createVehicle(pos, quat) {
+function createVehicle(pos, quat, isLocalUser, test) {
+
 
 	// Vehicle contants
 
@@ -302,77 +340,105 @@ function createVehicle(pos, quat) {
 
 	// Sync keybord actions and physics and graphics
 	function sync(dt) {
-
-		var speed = vehicle.getCurrentSpeedKmHour();
-
-		speedometer.innerHTML = (speed < 0 ? '(R) ' : '') + Math.abs(speed).toFixed(1) + ' km/h';
-
-		breakingForce = 0;
-		engineForce = 0;
-
-		if (actions.acceleration) {
-			if (speed < -1)
-				breakingForce = maxBreakingForce;
-			else engineForce = maxEngineForce;
-		}
-		if (actions.braking) {
-			if (speed > 1)
-				breakingForce = maxBreakingForce;
-			else engineForce = -maxEngineForce / 2;
-		}
-		if (actions.left) {
-			if (vehicleSteering < steeringClamp)
-				vehicleSteering += steeringIncrement;
-		}
-		else {
-			if (actions.right) {
-				if (vehicleSteering > -steeringClamp)
-					vehicleSteering -= steeringIncrement;
-			}
-			else {
-				if (vehicleSteering < -steeringIncrement)
-					vehicleSteering += steeringIncrement;
-				else {
-					if (vehicleSteering > steeringIncrement)
-						vehicleSteering -= steeringIncrement;
-					else {
-						vehicleSteering = 0;
-					}
-				}
-			}
-		}
-
-		vehicle.applyEngineForce(engineForce, BACK_LEFT);
-		vehicle.applyEngineForce(engineForce, BACK_RIGHT);
-
-		vehicle.setBrake(breakingForce / 2, FRONT_LEFT);
-		vehicle.setBrake(breakingForce / 2, FRONT_RIGHT);
-		vehicle.setBrake(breakingForce, BACK_LEFT);
-		vehicle.setBrake(breakingForce, BACK_RIGHT);
-
-		vehicle.setSteeringValue(vehicleSteering, FRONT_LEFT);
-		vehicle.setSteeringValue(vehicleSteering, FRONT_RIGHT);
-
-		var tm, p, q, i;
-		var n = vehicle.getNumWheels();
-		for (i = 0; i < n; i++) {
-			vehicle.updateWheelTransform(i, true);
-			tm = vehicle.getWheelTransformWS(i);
-			p = tm.getOrigin();
-			q = tm.getRotation();
-			wheelMeshes[i].position.set(p.x(), p.y(), p.z());
-			wheelMeshes[i].quaternion.set(q.x(), q.y(), q.z(), q.w());
-		}
-
-		tm = vehicle.getChassisWorldTransform();
-		p = tm.getOrigin();
-		q = tm.getRotation();
-		chassisMesh.position.set(p.x(), p.y(), p.z());
-		chassisMesh.quaternion.set(q.x(), q.y(), q.z(), q.w());
-
-		camera.position.set(p.x(), p.y() + 1, p.z());
-		camera.quaternion.set(q.x(), q.y(), q.z(), q.w());
-		camera.rotateY(Math.PI);
+        console.warn(test + " test " + isLocalUser);
+        if (isLocalUser) {
+        		var speed = vehicle.getCurrentSpeedKmHour();
+        
+        		speedometer.innerHTML = (speed < 0 ? '(R) ' : '') + Math.abs(speed).toFixed(1) + ' km/h';
+        
+        		breakingForce = 0;
+        		engineForce = 0;
+        
+        		if (actions.acceleration) {
+        			if (speed < -1)
+        				breakingForce = maxBreakingForce;
+        			else engineForce = maxEngineForce;
+        		}
+        		if (actions.braking) {
+        			if (speed > 1)
+        				breakingForce = maxBreakingForce;
+        			else engineForce = -maxEngineForce / 2;
+        		}
+        		if (actions.left) {
+        			if (vehicleSteering < steeringClamp)
+        				vehicleSteering += steeringIncrement;
+        		}
+        		else {
+        			if (actions.right) {
+        				if (vehicleSteering > -steeringClamp)
+        					vehicleSteering -= steeringIncrement;
+        			}
+        			else {
+        				if (vehicleSteering < -steeringIncrement)
+        					vehicleSteering += steeringIncrement;
+        				else {
+        					if (vehicleSteering > steeringIncrement)
+        						vehicleSteering -= steeringIncrement;
+        					else {
+        						vehicleSteering = 0;
+        					}
+        				}
+        			}
+        		}
+        
+        		vehicle.applyEngineForce(engineForce, BACK_LEFT);
+        		vehicle.applyEngineForce(engineForce, BACK_RIGHT);
+        
+        		vehicle.setBrake(breakingForce / 2, FRONT_LEFT);
+        		vehicle.setBrake(breakingForce / 2, FRONT_RIGHT);
+        		vehicle.setBrake(breakingForce, BACK_LEFT);
+        		vehicle.setBrake(breakingForce, BACK_RIGHT);
+        
+        		vehicle.setSteeringValue(vehicleSteering, FRONT_LEFT);
+        		vehicle.setSteeringValue(vehicleSteering, FRONT_RIGHT);
+        
+        		var tm, p, q, i;
+        		var n = vehicle.getNumWheels();
+        		for (i = 0; i < n; i++) {
+        			vehicle.updateWheelTransform(i, true);
+        			tm = vehicle.getWheelTransformWS(i);
+        			p = tm.getOrigin();
+        			q = tm.getRotation();
+        			wheelMeshes[i].position.set(p.x(), p.y(), p.z());
+        			wheelMeshes[i].quaternion.set(q.x(), q.y(), q.z(), q.w());
+        		}
+        
+        		//console.log(`${p.x()} ${p.y()} ${p.z()}`)
+        
+        		tm = vehicle.getChassisWorldTransform();
+        		p = tm.getOrigin();
+        		q = tm.getRotation();
+        		chassisMesh.position.set(p.x(), p.y(), p.z());
+        		chassisMesh.quaternion.set(q.x(), q.y(), q.z(), q.w());
+                
+                frameNum += 1;
+                if (frameNum % 30) {
+        	       socket.send(JSON.stringify({
+                       msgType: "PositionUpdate",
+                       name: username,
+                       position: {
+                           x: p.x(),
+                           y: p.y(),
+                           z: p.z()
+                       },
+                       rotation: {
+                           x: q.x(),
+                           y: q.y(),
+                           z: q.z(),
+                           w: q.w()
+                       },
+                       velocity: {
+                           x: vehicle.getForwardVector().x(),
+                           y: vehicle.getForwardVector().y(),
+                           z: vehicle.getForwardVector().z()
+                       }
+                   }))
+                }
+        
+        		camera.position.set(p.x(), p.y() + 2, p.z()-4);
+        		camera.quaternion.set(q.x(), q.y(), q.z(), q.w());
+        		camera.rotateY(Math.PI);
+        }
 	}
 
 	syncList.push(sync);
@@ -468,7 +534,17 @@ function createObjects() {
 
 		//createVehicle(new THREE.Vector3(0, 4, -20), ZERO_QUATERNION);
 		//createVehicle(new THREE.Vector3(0, 4, -40), ZERO_QUATERNION);
-		createVehicle(new THREE.Vector3(bbox.min.x, 4, bbox.min.z), ZERO_QUATERNION);
+
+		createVehicle(new THREE.Vector3(-20, 4, -97), ZERO_QUATERNION, true, "ME");
+
+
+        for (const [key, value] of userMap.entries()) {
+		    createVehicle(new THREE.Vector3(-25, 10, -97), ZERO_QUATERNION, false, key);
+        }
+
+		//createVehicle(new THREE.Vector3((bbox.min.x + bbox.max.x) / 2 + 5, 4, bbox.min.z), ZERO_QUATERNION);
+		// -23.06685447692871 0.4176217019557953 -97.69366455078125
+
 	}, undefined, function (error) {
 		console.error( error );
 	});
@@ -478,25 +554,111 @@ function createObjects() {
 // - Init -
 
 function sendIt() {
-	socket.send("Starting game")
-	startGameDiv.setAttribute("hidden", true)
+	startGameDiv.style.display = "none"
+	console.log("meow")
 	initGraphics();
 	initPhysics();
 	createObjects();
 	tick();
 }
 
+function socketMessageHandler(e) {
+	console.log(e.data)
+    let msgObj = JSON.parse(e.data)
+    switch (msgObj.msgType) {
+        case "RacerInfo":
+            let newUsername = msgObj. name
+            if (!userMap.has(newUsername)) {
+	            socket.send(JSON.stringify({
+                    msgType: "RacerInfo",
+                    name: username
+                }))
+                userMap.set(newUsername, "idk"); /* can store user's car model or smth here */
+				racerList.innerText = [username, ...userMap.keys()].join(', ')
+            }
+            break;
+        case "RoomStateChange":
+            switch (msgObj.newState) {
+                case "RACING":
+                    sendIt();
+                    break;
+            }
+            break;
+    }
+}
+
+function waitForSocketConnection(socket, callback){
+    setTimeout(
+        function () {
+            if (socket.readyState === 1) {
+                console.log("Connection is made")
+                if (callback != null){
+                    callback();
+                }
+            } else {
+                console.log("wait for connection...")
+                waitForSocketConnection(socket, callback);
+            }
+
+        }, 5); // wait 5 milisecond for the connection...
+}
+
+async function joinRoom(room) {
+	if (username.length > 0) {
+		socket = new WebSocket(`ws://localhost:8080/ws/${room.id}`)
+		socket.onmessage = socketMessageHandler
+		makeLobbyDiv.style.display = "none"
+		gameInfoDiv.style.display = "flex"
+		const gameName = document.createElement("p")
+		gameName.innerText = room.name
+		gameInfoDiv.insertBefore(gameName, racerList)
+		existingRoomsDiv.style.display = "none"
+
+        waitForSocketConnection(socket, function(){
+	        socket.send(JSON.stringify({
+                msgType: "RacerInfo",
+                name: username
+            }))
+
+	        makeLobbyButton.style.display = "none"
+	        startGameButton.disabled = false
+	        existingRoomsDiv.style.display = "none"
+        });
+
+    } else {
+        alert("Please enter a username");
+    }
+}
+
+
 async function findRooms() {
 	const res = await fetch("http://localhost:8080/rooms")
 	const data = await res.json()
-	console.log(data)
+	if (data && Array.isArray(data) && data.length > 0) {
+		const header = document.createElement("p")
+		header.innerText = "Existing Rooms"
+		existingRoomsDiv.appendChild(header)
+		for (const room of data) {
+			const roomDesc = document.createElement("div")
+			roomDesc.classList.add("roomDesc")
+			const roomText = document.createElement("p")
+			roomText.innerText = `${room.name} ${room.id}`
+			const roomSelector = document.createElement("button")
+			roomSelector.onclick = () => joinRoom(room)
+			roomSelector.innerText = "Select"
+			roomDesc.appendChild(roomText)
+			roomDesc.appendChild(roomSelector)
+			existingRoomsDiv.appendChild(roomDesc)
+		}
+	}
 }
 
-console.log("finding rooms....")
-await findRooms()
 
-async function joinLobby() {
-	var payload = {name: "hi"};
+async function makeLobby() {
+	const name = makeLobbyInput.value
+	if (name.length === 0) return;
+
+	var payload = {name};
     //var type = root.lookupType("RoomCreationRequest");
     //var msg = type.create(payload);
     //var buf = type.encode(msg).finish();
@@ -525,12 +687,14 @@ async function joinLobby() {
 				
 		const data = await response.json()
 		socket = new WebSocket(`ws://localhost:8080/ws/${data.id}`)
-		socket.onmessage = function (e) {
-			console.log(e.data)
-		};
+		socket.onmessage = socketMessageHandler
 	  
-		joinLobbyButton.disabled = true
-		startGameButton.disabled = false
+		makeLobbyDiv.style.display = "none"
+		existingRoomsDiv.style.display = "none"
+		gameInfoDiv.style.display = "flex"
+		const gameName = document.createElement("p")
+		gameName.innerText = name
+		gameInfoDiv.insertBefore(gameName, racerList)
 
 	} catch (e) {
 		console.error(e);
