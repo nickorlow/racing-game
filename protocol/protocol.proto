@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+option go_package = "/pb";
+
+package racer;
+
+enum RoomState {
+    LOBBY,   // Lobby is joinable, people can change cars/names
+    RACING,  // Lobby is currently racing. Cannot be joined
+    RESULTS, // Lobby is displaying results (race is over)
+    DEAD     // Lobby has been destroyed, clients should redirect to home
+}
+
+message RoomStateChange {
+    RoomState new_state = 1;
+}
+
+message RacerInfo {
+    uint32           id = 1;
+    string         name = 2;
+    uint32 car_model_id = 3;
+}
+
+message PositionUpdate {
+    Position position  = 1;
+    Vector   vector    = 2;
+    uint32   racer_id  = 3;
+}
+
+message Position {
+    double x = 1;
+    double y = 2;
+    double z = 3;
+}
+
+message Vector {
+    double x = 1;
+    double y = 2;
+    double z = 3;
+}
