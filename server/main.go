@@ -4,7 +4,6 @@ import (
     "log"
     "net/http"
     "fmt"
-    "strings"
     "time"
     "racer/server/pb"
 )
@@ -23,8 +22,6 @@ func main() {
 	hub := newHub()
 	go hub.run()
 	http.HandleFunc("/ws/", func(w http.ResponseWriter, r *http.Request) {
-        id := strings.TrimPrefix(r.URL.Path, "/ws/")
-        log.Println(id)
 		serveWs(hub, w, r)
 	})
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

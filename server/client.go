@@ -5,6 +5,9 @@ import (
 	"log"
 	"net/http"
 	"time"
+    "strings"
+    "strconv"
+    "math/rand"
 
 	"github.com/gorilla/websocket"
 )
@@ -29,7 +32,15 @@ var upgrader = websocket.Upgrader{
 type Client struct {
 	hub *Hub
 	conn *websocket.Conn
-	send chan []byte
+	send chan Envelope
+    room_id uint32
+    id uint32
+}
+
+type Envelope struct {
+    message []byte
+    room_id uint32
+    sender_id uint32
 }
 
 func (c *Client) readPump() {
@@ -49,7 +60,8 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.hub.broadcast <- message
+        envelope := Envelope{message: message, room_id: c.room_id, sender_id: c.id} 
+		c.hub.broadcast <-envelope 
 	}
 }
 
@@ -61,7 +73,8 @@ func (c *Client) writePump() {
 	}()
 	for {
 		select {
-		case message, ok := <-c.send:
+		case envelope, ok := <-c.send:
+            message := envelope.message
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel.
@@ -73,12 +86,23 @@ func (c *Client) writePump() {
 			if err != nil {
 				return
 			}
-			w.Write(message)
+            
+            // is this moronic?
 
-			n := len(c.send)
+            log.Println(envelope.sender_id)
+            log.Println(c.id)
+            if c.room_id == envelope.room_id && c.id != envelope.sender_id {
+			    w.Write(message)
+            }
+
+
+            n := len(c.send)
 			for i := 0; i < n; i++ {
 				w.Write(newline)
-				w.Write(<-c.send)
+                envelope, ok = <-c.send
+                if c.room_id == envelope.room_id && c.id != envelope.sender_id {
+			    	w.Write(envelope.message)
+                }
 			}
 
 			if err := w.Close(); err != nil {
@@ -99,8 +123,21 @@ func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+
+    id := strings.TrimPrefix(r.URL.Path, "/ws/")
+    room_id_long, err := strconv.ParseInt(id, 10, 32)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+    room_id_32 := uint32(room_id_long)
+
+    client := &Client{hub: hub, conn: conn, send: make(chan Envelope, 256), room_id: room_id_32, id: rand.Uint32()} // 1/4b chance broken but whatever
 	client.hub.register <- client
+
+	//ws_w, _ := client.conn.NextWriter(websocket.TextMessage)
+    //ws_w.Write([]byte(strconv.FormatUint(uint64(client.id), 10)))
+
 
 	go client.writePump()
 	go client.readPump()
