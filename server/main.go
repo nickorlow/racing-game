@@ -13,7 +13,8 @@ import (
     "strings"
     "os"
     "os/exec"
-    "github.com/golang/protobuf/proto"
+    //"github.com/golang/protobuf/proto"
+	"encoding/json"
 )
 
 func main() {
@@ -43,14 +44,14 @@ func main() {
                 fmt.Println(err)
             }
 
-            if err := proto.Unmarshal(data, &roomCreation); err != nil {
+            if err := json.Unmarshal(data, &roomCreation); err != nil {
                 fmt.Println(err)
             }
 
             fmt.Println(roomCreation)
 
             room := get_new_room(roomCreation.Name)
-            respObj, err := proto.Marshal(&room)
+            respObj, err := json.Marshal(&room)
             log.Println(room.Id)
             if err != nil {
             	log.Fatalf("Unable to marshal response : %v", err)
