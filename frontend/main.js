@@ -21,7 +21,7 @@ const startGameDiv = document.getElementById("startPopup")
 const container = document.getElementById( 'container' );
 const speedometer = document.getElementById( 'speedometer' );
 const existingRoomsDiv = document.getElementById("existingRooms")
-
+let host = "10.147.34.64"
 let socket = null
 let roomID = ""
 //container.setAttribute("hidden", true)
@@ -682,7 +682,7 @@ function waitForSocketConnection(socket, callback){
 async function joinRoom(room) {
 	if (username.length > 0) {
 		roomID = room.id
-		socket = new WebSocket(`ws://localhost:8080/ws/${room.id}`)
+		socket = new WebSocket(`ws://${host}:8080/ws/${room.id}`)
 		socket.onmessage = socketMessageHandler
 		makeLobbyDiv.style.display = "none"
 		gameInfoDiv.style.display = "flex"
@@ -709,7 +709,7 @@ async function joinRoom(room) {
 
 
 async function findRooms() {
-	const res = await fetch("http://localhost:8080/rooms")
+	const res = await fetch(`http://${host}:8080/rooms`)
 	const data = await res.json()
 	if (data && Array.isArray(data) && data.length > 0) {
 		const header = document.createElement("p")
@@ -765,7 +765,7 @@ async function makeLobby() {
 		const data = await response.json()
 
 		roomID = data.id
-		socket = new WebSocket(`ws://localhost:8080/ws/${data.id}`)
+		socket = new WebSocket(`ws://${host}:8080/ws/${data.id}`)
 		socket.onmessage = socketMessageHandler
 	  
 		makeLobbyDiv.style.display = "none"
