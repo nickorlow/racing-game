@@ -23,6 +23,7 @@ const speedometer = document.getElementById( 'speedometer' );
 const existingRoomsDiv = document.getElementById("existingRooms")
 
 let socket = null
+let roomID = ""
 //container.setAttribute("hidden", true)
 startGameButton.onclick = () => {
 	socket.send(JSON.stringify({
@@ -605,6 +606,7 @@ function waitForSocketConnection(socket, callback){
 
 async function joinRoom(room) {
 	if (username.length > 0) {
+		roomID = room.id
 		socket = new WebSocket(`ws://localhost:8080/ws/${room.id}`)
 		socket.onmessage = socketMessageHandler
 		makeLobbyDiv.style.display = "none"
@@ -687,6 +689,7 @@ async function makeLobby() {
 				
 		const data = await response.json()
 		socket = new WebSocket(`ws://localhost:8080/ws/${data.id}`)
+		roomID = data.id
 		socket.onmessage = socketMessageHandler
 	  
 		makeLobbyDiv.style.display = "none"
