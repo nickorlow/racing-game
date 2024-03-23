@@ -3,7 +3,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
 import { PCDLoader } from 'three/addons/loaders/PCDLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { warn } from 'console';
 
 const startGameButton = document.getElementById("startButton")
 const submitUsernameButton = document.getElementById("submitUsername")
@@ -536,7 +535,7 @@ function createObjects() {
 	*/
 
 	const pcdloader = new PCDLoader();
-	pcdloader.load(`/room/pc_map_down/${roomID}`, function (points) {
+	pcdloader.load(`/public/pcd_downsampled.pcd`, function (points) {
 		//console.log(points);
 		var kvec = new THREE.Vector3(100, 100, 100);
 		points.scale.copy(kvec);
@@ -580,7 +579,7 @@ function createObjects() {
 	});
 
 	const gltfloader = new GLTFLoader();
-	gltfloader.load(`/room/mesh_map/${roomID}`, function (gltf) {
+	gltfloader.load(`/public/mesh2.glb`, function (gltf) {
 		const color = 0xFFFFFF;
 		const intensity = 10;
 		const light = new THREE.DirectionalLight(color, intensity);
@@ -682,7 +681,7 @@ function waitForSocketConnection(socket, callback){
 
 async function joinRoom(room) {
 	if (username.length > 0) {
-        roomID = room.id
+		roomID = room.id
 		socket = new WebSocket(`wss://able-willingly-moose.ngrok-free.app/ws/${room.id}`)
 		socket.onmessage = socketMessageHandler
 		makeLobbyDiv.style.display = "none"
@@ -764,6 +763,8 @@ async function makeLobby() {
 		///const ntype = root.lookupType("Room");
 				
 		const data = await response.json()
+
+		roomID = data.id
 		socket = new WebSocket(`wss://able-willingly-moose.ngrok-free.app/ws/${data.id}`)
 		socket.onmessage = socketMessageHandler
 	  
