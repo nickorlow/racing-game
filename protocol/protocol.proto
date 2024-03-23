@@ -8,7 +8,6 @@ message PositionUpdate {
     Position position = 1;
     Vector   vector   = 2;
     uint32   user_id  = 3;
-    uint32   room_id  = 4;
 }
 
 message Position {

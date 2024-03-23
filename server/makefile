@@ -1,4 +1,4 @@
-.PHONY: run proto
+.PHONY: run proto clean
 
 proto: 
 	protoc --go_out=. --proto_path=../protocol/ ../protocol/protocol.proto
