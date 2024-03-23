@@ -463,7 +463,7 @@ function createObjects() {
 	*/
 
 	const pcdloader = new PCDLoader();
-	pcdloader.load(`/room/mesh_map/${roomID}`, function (points) {
+	pcdloader.load(`/room/pc_map_down/${roomID}`, function (points) {
 		//console.log(points);
 		var kvec = new THREE.Vector3(100, 100, 100);
 		points.scale.copy(kvec);

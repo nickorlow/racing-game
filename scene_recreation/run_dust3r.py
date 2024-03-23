@@ -237,6 +237,9 @@ def main():
         #trimesh_scene_pcd.export(file_obj=pcd_outfile)
         trimesh_scene_mesh.export(file_obj=mesh_outfile)
         o3d.io.write_point_cloud(os.path.join(outdir, f'pcd{args.id}.pcd'), pcd)
+        pcd = preprocess(pcd, use_rgb=True, max_points=40000)
+        o3d.io.write_point_cloud(os.path.join(outdir, f'pcd_downsampled{args.id}.pcd'), pcd)
+
         print('(exporting 3D scene to', os.path.join(outdir, f'pcd{args.id}.pcd'), "," , mesh_outfile,')')
 
 
