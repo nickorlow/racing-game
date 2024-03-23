@@ -452,8 +452,8 @@ function createVehicle(pos, quat, isLocalUser, test) {
         		p = tm.getOrigin();
         		q = tm.getRotation();
 
-                camera.position.set(p.x(), p.y() + 1, p.z() - 1);
-        		camera.quaternion.set(q.x(), q.y(), q.z()/2, q.w());
+                camera.position.set(p.x(), p.y() + 1, p.z());
+        		camera.quaternion.set(q.x(), q.y(), q.z(), q.w());
         		camera.rotateY(Math.PI);
                 }
         } else {
@@ -478,9 +478,10 @@ function createVehicle(pos, quat, isLocalUser, test) {
 
         		    //chassisMesh.position.set(p.x(), p.y(), p.z());
         		    //chassisMesh.quaternion.set(q.x(), q.y(), q.z(), q.w());
+        		    var n = vehicle.getNumWheels();
         		    for (i = 0; i < n; i++) {
-        		    	wheelMeshes[i].position.set(locationData.wheels[i].position.x(), locationData.wheels[i].position.y(), locationData.wheels[i].position.z());
-        		    	wheelMeshes[i].quaternion.set(locationData.wheels[i].rotation.x(), locationData.wheels[i].rotation.y(), locationData.wheels[i].rotation.z(), locationData.wheels[i].rotation.w());
+        		    	wheelMeshes[i].position.set(locationData.wheels[i].position.x, locationData.wheels[i].position.y, locationData.wheels[i].position.z);
+        		    	wheelMeshes[i].quaternion.set(locationData.wheels[i].rotation.x, locationData.wheels[i].rotation.y, locationData.wheels[i].rotation.z, locationData.wheels[i].rotation.w);
         		    }
         		    chassisMesh.position.set(locationData.chassis.position.x, locationData.chassis.position.y, locationData.chassis.position.z);
         		    chassisMesh.quaternion.set(locationData.chassis.rotation.x, locationData.chassis.rotation.y, locationData.chassis.rotation.z, locationData.chassis.rotation.w);
