@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
 import { PCDLoader } from 'three/addons/loaders/PCDLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { warn } from 'console';
 
 const startGameButton = document.getElementById("startButton")
 const submitUsernameButton = document.getElementById("submitUsername")
@@ -681,6 +682,7 @@ function waitForSocketConnection(socket, callback){
 
 async function joinRoom(room) {
 	if (username.length > 0) {
+        roomID = room.id
 		socket = new WebSocket(`wss://able-willingly-moose.ngrok-free.app/ws/${room.id}`)
 		socket.onmessage = socketMessageHandler
 		makeLobbyDiv.style.display = "none"
