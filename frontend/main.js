@@ -9,9 +9,14 @@ const joinLobbyButton = document.getElementById("joinLobby")
 const startGameDiv = document.getElementById("startPopup")
 const container = document.getElementById( 'container' );
 const speedometer = document.getElementById( 'speedometer' );
+const existingRoomsDiv = document.getElementById("existingRooms")
+
 let socket = null
 //container.setAttribute("hidden", true)
-startGameButton.onclick = sendIt
+startGameButton.onclick = () => {
+	socket.send("Starting game")
+	sendIt()
+}
 joinLobbyButton.onclick = joinLobby
 
 //async function spinUp() {
@@ -363,6 +368,7 @@ function createVehicle(pos, quat) {
 			wheelMeshes[i].position.set(p.x(), p.y(), p.z());
 			wheelMeshes[i].quaternion.set(q.x(), q.y(), q.z(), q.w());
 		}
+		//console.log(`${p.x()} ${p.y()} ${p.z()}`)
 
 		tm = vehicle.getChassisWorldTransform();
 		p = tm.getOrigin();
@@ -468,7 +474,11 @@ function createObjects() {
 
 		//createVehicle(new THREE.Vector3(0, 4, -20), ZERO_QUATERNION);
 		//createVehicle(new THREE.Vector3(0, 4, -40), ZERO_QUATERNION);
-		createVehicle(new THREE.Vector3(bbox.min.x, 4, bbox.min.z), ZERO_QUATERNION);
+		createVehicle(new THREE.Vector3(-20, 4, -97), ZERO_QUATERNION);
+
+		//createVehicle(new THREE.Vector3((bbox.min.x + bbox.max.x) / 2 + 5, 4, bbox.min.z), ZERO_QUATERNION);
+		// -23.06685447692871 0.4176217019557953 -97.69366455078125
+
 	}, undefined, function (error) {
 		console.error( error );
 	});
@@ -478,18 +488,49 @@ function createObjects() {
 // - Init -
 
 function sendIt() {
-	socket.send("Starting game")
-	startGameDiv.setAttribute("hidden", true)
+	startGameDiv.style.display = "none"
+	console.log("meow")
 	initGraphics();
 	initPhysics();
 	createObjects();
 	tick();
 }
 
+function socketMessageHandler(e) {
+	console.log(e.data)
+	if (e.data === "Starting game") {
+		sendIt()
+	}
+}
+
+
+async function joinRoom(roomID) {
+	socket = new WebSocket(`ws://localhost:8080/ws/${roomID}`)
+	socket.onmessage = socketMessageHandler
+	joinLobbyButton.disabled = true
+	startGameButton.disabled = false
+	existingRoomsDiv.style.display = "none"
+
+}
+
+
 async function findRooms() {
 	const res = await fetch("http://localhost:8080/rooms")
 	const data = await res.json()
-	console.log(data)
+	if (data && Array.isArray(data)) {
+		for (const room of data) {
+			const roomDesc = document.createElement("div")
+			roomDesc.classList.add("roomDesc")
+			const roomText = document.createElement("p")
+			roomText.innerText = `${room.name} ${room.id}`
+			const roomSelector = document.createElement("button")
+			roomSelector.onclick = () => joinRoom(room.id)
+			roomSelector.innerText = "Select"
+			roomDesc.appendChild(roomText)
+			roomDesc.appendChild(roomSelector)
+			existingRoomsDiv.appendChild(roomDesc)
+		}
+	}
 }
 
 await findRooms()
@@ -524,9 +565,7 @@ async function joinLobby() {
 				
 		const data = await response.json()
 		socket = new WebSocket(`ws://localhost:8080/ws/${data.id}`)
-		socket.onmessage = function (e) {
-			console.log(e.data)
-		};
+		socket.onmessage = socketMessageHandler
 	  
 		joinLobbyButton.disabled = true
 		startGameButton.disabled = false
