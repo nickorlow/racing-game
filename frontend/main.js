@@ -5,7 +5,15 @@ import { PCDLoader } from 'three/addons/loaders/PCDLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const startGameButton = document.getElementById("startButton")
-const joinLobbyButton = document.getElementById("joinLobby")
+const submitUsernameButton = document.getElementById("submitUsername")
+const usernameInput = document.getElementById("usernameInput")
+const usernameDiv = document.getElementById("usernameDiv")
+const makeLobbyButton = document.getElementById("makeLobby")
+
+makeLobbyButton.style.display = "none"
+startGameButton.style.display = "none"
+let username = ""
+
 const startGameDiv = document.getElementById("startPopup")
 const container = document.getElementById( 'container' );
 const speedometer = document.getElementById( 'speedometer' );
@@ -17,7 +25,22 @@ startGameButton.onclick = () => {
 	socket.send("Starting game")
 	sendIt()
 }
-joinLobbyButton.onclick = joinLobby
+makeLobbyButton.onclick = makeLobby
+
+
+function submitUsernameAction() {
+	if (usernameInput.value.length > 0) {
+		findRooms()
+		makeLobbyButton.style.display = "inline-block"
+		startGameButton.style.display = "inline-block"
+		usernameDiv.style.display = "none"
+		username = usernameInput.value
+		console.log(username)
+
+	}
+}
+
+submitUsernameButton.onclick = submitUsernameAction
 
 //async function spinUp() {
 	//container.setAttribute("hidden", false)
@@ -507,7 +530,7 @@ function socketMessageHandler(e) {
 async function joinRoom(roomID) {
 	socket = new WebSocket(`ws://localhost:8080/ws/${roomID}`)
 	socket.onmessage = socketMessageHandler
-	joinLobbyButton.disabled = true
+	makeLobbyButton.style.display = "none"
 	startGameButton.disabled = false
 	existingRoomsDiv.style.display = "none"
 
@@ -517,7 +540,10 @@ async function joinRoom(roomID) {
 async function findRooms() {
 	const res = await fetch("http://localhost:8080/rooms")
 	const data = await res.json()
-	if (data && Array.isArray(data)) {
+	if (data && Array.isArray(data) && data.length > 0) {
+		const header = document.createElement("p")
+		header.innerText = "Existing Rooms"
+		existingRoomsDiv.appendChild(header)
 		for (const room of data) {
 			const roomDesc = document.createElement("div")
 			roomDesc.classList.add("roomDesc")
@@ -533,9 +559,8 @@ async function findRooms() {
 	}
 }
 
-await findRooms()
 
-async function joinLobby() {
+async function makeLobby() {
 	var payload = {name: "hi"};
     //var type = root.lookupType("RoomCreationRequest");
     //var msg = type.create(payload);
@@ -567,7 +592,8 @@ async function joinLobby() {
 		socket = new WebSocket(`ws://localhost:8080/ws/${data.id}`)
 		socket.onmessage = socketMessageHandler
 	  
-		joinLobbyButton.disabled = true
+		makeLobbyButton.style.display = "none"
+		existingRoomsDiv.style.display = "none"
 		startGameButton.disabled = false
 
 	} catch (e) {
