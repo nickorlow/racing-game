@@ -9,7 +9,7 @@
       <div class="titleDiv flexRow flexCenter">
         <p>Make a Scene</p>
       </div>
-      <div class="formContainer flexCol">
+      <div id="formContainer" class="flexCol">
         <form method="post" enctype="multipart/form-data">
           <div class="formButton flexCol">
             <label for="image_uploads">Choose images to upload (PNG, JPG)</label>
@@ -25,6 +25,7 @@
           <div id="submit" class="formButton flexCol">
             <button id="submitButton">Submit</button>
           </div>
+          <p id="uploadStatus"></p>
         </form>
       </div>
     </div>

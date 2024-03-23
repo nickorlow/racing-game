@@ -67,7 +67,7 @@ input[type=file] {
 }
 
 @media all and (orientation: portrait) {
-  .formContainer {
+  #formContainer {
     width: 90%;
     padding: 0px 5%;
   }
@@ -87,7 +87,7 @@ input[type=file] {
 }
 
 @media all and (orientation: landscape) {
-  .formContainer {
+  #formContainer {
     width: 70%;
     padding: 0px 15%;
   }
@@ -101,4 +101,10 @@ input[type=file] {
   #image_previews {
     padding: 1em 15% 0; 
   }
+}
+
+
+#image_previews {
+  max-height: 70vh;
+  overflow-y: scroll;
 }

@@ -1,6 +1,8 @@
 const input = document.getElementById("image_uploads");
 const preview = document.getElementById("image_previews");
 const noFiles = document.getElementById("no_files");
+const formContainer = document.getElementById("formContainer");
+const uploadStatus = document.getElementById("uploadStatus");
 
 
 input.style.opacity = 0;
@@ -70,8 +72,6 @@ function returnFileSize(number) {
 const button = document.getElementById("submitButton");
 button.addEventListener("click", async (e) => {
   e.preventDefault();
-  const para = document.createElement("p");
-  para.append("Image uploaded!");
   let imageSources = Array.from(preview.children).map(e => e.lastChild.src)
   let blobs = []
   for (const imageSource of imageSources) {
@@ -80,5 +80,6 @@ button.addEventListener("click", async (e) => {
     blobs.push(blob)
   }
   console.log(blobs)
-  preview.replaceChildren(para);
+  preview.innerHTML = ""
+  uploadStatus.innerText = "Image uploaded!"
 });
