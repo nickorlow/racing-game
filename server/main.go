@@ -62,6 +62,31 @@ func main() {
             http.Error(w, "Method not allowed. WOMP WOMP", http.StatusMethodNotAllowed)
         }
     })
+
+    // Get list of existing rooms
+    http.HandleFunc("/rooms", func(w http.ResponseWriter, r *http.Request) {
+        if (r.Method == http.MethodGet) {
+            txn := db.Txn(false)
+            defer txn.Abort()
+            it, err := txn.Get("rooms", "id")
+            if err != nil {
+                log.Fatalf("Unable to marshal response : %v", err)
+            }
+            var rooms[] pb.Room
+            for obj := it.Next(); obj != nil; obj = it.Next() {
+                p := obj.(pb.Room)
+                rooms = append(rooms, p)
+            }
+            fmt.Println(rooms)
+            respObj, err := json.Marshal(&rooms)
+            w.Header().Set("Content-Type", "application/json")
+            w.WriteHeader(http.StatusOK)
+            w.Write(respObj)
+
+        } else {
+            http.Error(w, "Method not allowed. WOMP WOMP", http.StatusMethodNotAllowed)
+        }
+    })
    
     // Add images
     http.HandleFunc("/room/images/", func(w http.ResponseWriter, r *http.Request) {

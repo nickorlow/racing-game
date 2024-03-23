@@ -9,6 +9,7 @@ const joinLobbyButton = document.getElementById("joinLobby")
 const startGameDiv = document.getElementById("startPopup")
 const container = document.getElementById( 'container' );
 const speedometer = document.getElementById( 'speedometer' );
+let socket = null
 //container.setAttribute("hidden", true)
 startGameButton.onclick = sendIt
 joinLobbyButton.onclick = joinLobby
@@ -396,13 +397,13 @@ function createObjects() {
 
 	const pcdloader = new PCDLoader();
 	pcdloader.load('public/pcd_downsampled.pcd', function (points) {
-		console.log(points);
+		//console.log(points);
 		var kvec = new THREE.Vector3(100, 100, 100);
 		points.scale.copy(kvec);
 		console.log(kvec);
 		points.rotateX(-Math.PI/2);
 		points.rotateZ(Math.PI/2);
-		console.log(points);
+		//console.log(points);
 		var bbox = new THREE.Box3().setFromObject(points);
 		console.log(bbox);
 		var width = bbox.max.x - bbox.min.x;
@@ -425,7 +426,7 @@ function createObjects() {
 			var kx = kgeom[i * 3];
 			var ky = kgeom[i * 3 + 1];
 			var kz = kgeom[i * 3 + 2];
-			console.log(kx + ' ' + ky + ' ' + kz);
+			//console.log(kx + ' ' + ky + ' ' + kz);
 			var kvec2 = new THREE.Vector3(kx, ky, kz);
 			kvec2.applyAxisAngle(xaxis, -Math.PI/2);
 			kvec2.applyAxisAngle(zaxis, -Math.PI/2);
@@ -477,12 +478,21 @@ function createObjects() {
 // - Init -
 
 function sendIt() {
+	socket.send("Starting game")
 	startGameDiv.setAttribute("hidden", true)
 	initGraphics();
 	initPhysics();
 	createObjects();
 	tick();
 }
+
+async function findRooms() {
+	const res = await fetch("http://localhost:8080/rooms")
+	const data = await res.json()
+	console.log(data)
+}
+
+await findRooms()
 
 async function joinLobby() {
 	var payload = {name: "hi"};
@@ -509,15 +519,18 @@ async function joinLobby() {
 			body: JSON.stringify(payload) // buf, // body data type must match "Content-Type" header
 		})
 		
-		const encoder = new TextEncoder();
-		const ntype = root.lookupType("Room");
+		//const encoder = new TextEncoder();
+		///const ntype = root.lookupType("Room");
 				
-		const t = await response.text()
-		//var u8 = new Uint8Array();
-		//encoder.encodeInto(t, u8);
-		//var rmsg = ntype.decode(u8);
-		//console.log(ntype.toObject(rmsg, {}));
-		console.log(JSON.parse(t))
+		const data = await response.json()
+		socket = new WebSocket(`ws://localhost:8080/ws/${data.id}`)
+		socket.onmessage = function (e) {
+			console.log(e.data)
+		};
+	  
+		joinLobbyButton.disabled = true
+		startGameButton.disabled = false
+
 	} catch (e) {
 		console.error(e);
 

@@ -60,6 +60,7 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		log.Printf(string(message))
         envelope := Envelope{message: message, room_id: c.room_id, sender_id: c.id} 
 		c.hub.broadcast <-envelope 
 	}
