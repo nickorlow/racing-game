@@ -1,3 +1,5 @@
 server
 pb/
 client
+images_*
+obj_*
