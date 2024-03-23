@@ -54,7 +54,7 @@ Ammo().then(function(Ammo) {
 		renderer.setClearColor( 0xbfd1e5 );
 		renderer.setPixelRatio( window.devicePixelRatio );
 		renderer.setSize( window.innerWidth, window.innerHeight );
-		controls = new OrbitControls( camera, renderer.domElement );
+		//controls = new OrbitControls( camera, renderer.domElement );
 
 		var ambientLight = new THREE.AmbientLight( 0x404040 );
 		scene.add( ambientLight );
@@ -108,7 +108,7 @@ Ammo().then(function(Ammo) {
 		for (var i = 0; i < syncList.length; i++)
 			syncList[i](dt);
 		physicsWorld.stepSimulation( dt, 10 );
-		controls.update( dt );
+		//controls.update( dt );
 		renderer.render( scene, camera );
 		time += dt;
 		stats.update();
@@ -356,6 +356,11 @@ Ammo().then(function(Ammo) {
 			q = tm.getRotation();
 			chassisMesh.position.set(p.x(), p.y(), p.z());
 			chassisMesh.quaternion.set(q.x(), q.y(), q.z(), q.w());
+
+            camera.position.x = p.x();
+            camera.position.y = p.y() + 0.2;
+            camera.position.z = p.z();
+            camera.quaternion.set(-q.x(), q.y(), q.z(), q.w());
 		}
 
 		syncList.push(sync);
@@ -448,12 +453,14 @@ Ammo().then(function(Ammo) {
             szene.position.z = -depth/2;
             scene.add(szene);
             //scene.add(bbox);
+
+            //createVehicle(new THREE.Vector3(0, 4, -20), ZERO_QUATERNION);
+            //createVehicle(new THREE.Vector3(0, 4, -40), ZERO_QUATERNION);
+            createVehicle(new THREE.Vector3(bbox.min.x, 4, bbox.min.z), ZERO_QUATERNION);
         }, undefined, function (error) {
 	        console.error( error );
         });
         
-		//createVehicle(new THREE.Vector3(0, 4, -20), ZERO_QUATERNION);
-        createVehicle(new THREE.Vector3(0, 4, -200), ZERO_QUATERNION);
 	}
 
 	// - Init -
