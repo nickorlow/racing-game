@@ -24,7 +24,18 @@ func main() {
 	http.HandleFunc("/ws/", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
 	})
+    
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "Welcome to my website!")
+    })
+
+    // Create room
+    http.HandleFunc("/room", func(w http.ResponseWriter, r *http.Request) {
+        fmt.Fprintf(w, "Welcome to my website!")
+    })
+   
+    // Add images
+    http.HandleFunc("/room//images", func(w http.ResponseWriter, r *http.Request) {
         fmt.Fprintf(w, "Welcome to my website!")
     })
 
