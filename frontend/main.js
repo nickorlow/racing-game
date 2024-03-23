@@ -463,7 +463,7 @@ function createObjects() {
 	*/
 
 	const pcdloader = new PCDLoader();
-	pcdloader.load('public/pcd_downsampled.pcd', function (points) {
+	pcdloader.load(`/room/mesh_map/${roomID}`, function (points) {
 		//console.log(points);
 		var kvec = new THREE.Vector3(100, 100, 100);
 		points.scale.copy(kvec);
@@ -507,7 +507,7 @@ function createObjects() {
 	});
 
 	const gltfloader = new GLTFLoader();
-	gltfloader.load('public/mesh2.glb', function (gltf) {
+	gltfloader.load(`/room/mesh_map/${roomID}`, function (gltf) {
 		const color = 0xFFFFFF;
 		const intensity = 10;
 		const light = new THREE.DirectionalLight(color, intensity);
