@@ -1,8 +1,34 @@
+<!DOCTYPE html>
 <html>
   <head>
     <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="imageform.css">
   </head>
   <body>
-    <p>shawn driscoll</p>
+    <div id="upload-page" class="page">
+      <div class="titleDiv flexRow flexCenter">
+        <p>Make a Scene</p>
+      </div>
+      <div class="formContainer flexCol">
+        <form method="post" enctype="multipart/form-data">
+          <div class="formButton flexCol">
+            <label for="image_uploads">Choose images to upload (PNG, JPG)</label>
+            <input
+              type="file"
+              id="image_uploads"
+              name="image_uploads"
+              accept=".jpg, .jpeg, .png"
+              multiple="multiple" />
+          </div>
+          <div id="image_previews" class="flexCol">
+          </div>
+          <div id="submit" class="formButton flexCol">
+            <button id="submitButton">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script src="/imageform.js"></script>
+
   </body>
 </html>

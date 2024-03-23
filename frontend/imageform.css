@@ -1,0 +1,104 @@
+
+form {
+  background: #ccc;
+  margin: 0 auto;
+  padding: 20px;
+  border: 1px solid black;
+  width: 100%;
+}
+
+form ol {
+  padding-left: 0;
+}
+
+.imagePreview .flexRow {
+  width: 100%;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.imagePreview {
+  background: #eee;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  list-style-type: none;
+  border: 1px solid black;
+  width: 100%;
+}
+
+form img {
+  max-width: 100%;
+  height: auto;
+}
+
+form p {
+  line-height: 32px;
+  padding-left: 10px;
+}
+
+form label, #submit button {
+  background-color: #7f9ccb;
+  height: auto;
+  border: none;
+}
+
+form label:hover,
+#submit button:hover {
+  background-color: #2d5ba3;
+  color: white;
+}
+
+form label:active,
+form button:active {
+  background-color: #0d3f8f;
+  color: white;
+}
+
+
+.formButton {
+  align-items: center;
+}
+
+input[type=file] {
+  height: 0;
+}
+
+@media all and (orientation: portrait) {
+  .formContainer {
+    width: 90%;
+    padding: 0px 5%;
+  }
+  form label, #submit button {
+    font-size: 2.5rem;
+    padding: 10px 20px;
+    border-radius: 10px;
+  }
+
+  .previewInfo, .previewInfo button {
+    font-size: 2rem;
+  }
+
+  #image_previews {
+    padding: 1em 5% 0; 
+  }
+}
+
+@media all and (orientation: landscape) {
+  .formContainer {
+    width: 70%;
+    padding: 0px 15%;
+  }
+
+  form label, #submit button {
+    font-size: 1rem;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+
+  #image_previews {
+    padding: 1em 15% 0; 
+  }
+}

@@ -29,27 +29,36 @@
   margin-bottom: 50px;
 }
 
-.titleDiv > p {
-}
-
-body {
-  margin: 0;
+body, button {
   font-family: Calibri, 'Trebuchet MS', sans-serif;
 
 }
 
+body {
+  margin: 0;
+}
 
 @media screen and (orientation: landscape) {
   .titleDiv > p {
     font-size: 32px;
   }
+
+  .main-link {
+    font-size: 24px;
+    width: 65%;
+  }
 }
 
 @media screen and (orientation: portrait) {
   .titleDiv > p {
-    font-size: 24px;
+    font-size: 64px;
+  } 
+
+  .main-link {
+    font-size: 48px;
+    width: 100%;
+
   }
-  
 }
 
 .main-options {
@@ -61,13 +70,11 @@ body {
 .main-link {
   display: flex;
   text-decoration: none;
-  width: 65%;
-  margin-bottom: 50px;
+  margin-bottom: 5vh;
   background-color: #333;
   border-radius: 60px;
   padding: 30px;
   color: #eee;
-  font-size: 24px;
 }
 
 .main-link:hover {
