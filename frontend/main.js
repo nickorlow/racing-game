@@ -82,7 +82,7 @@ var keysActions = {
 };
 
 const userMap = new Map();
-
+const vehicleMap = new Map();
 // - Functions -
 
 function initGraphics() {
@@ -212,7 +212,7 @@ function createBox(pos, quat, w, l, h, mass, friction, render = true) {
 	if (mass > 0) {
 		body.setActivationState(DISABLE_DEACTIVATION);
 		// Sync physics and graphics
-		function sync(dt) {
+		function sync(dt, nc) {
 			var ms = body.getMotionState();
 			if (ms) {
 				ms.getWorldTransform(TRANSFORM_AUX);
@@ -224,6 +224,7 @@ function createBox(pos, quat, w, l, h, mass, friction, render = true) {
 		}
 
 		syncList.push(sync);
+		syncListLocal.push(sync, true);
 	}
 }
 
@@ -243,7 +244,8 @@ function createChassisMesh(w, l, h) {
 	return mesh;
 }
 
-function createVehicle(pos, quat) {
+function createVehicle(pos, quat, isLocalUser, test) {
+
 
 	// Vehicle contants
 
@@ -336,103 +338,105 @@ function createVehicle(pos, quat) {
 
 	// Sync keybord actions and physics and graphics
 	function sync(dt) {
-
-		var speed = vehicle.getCurrentSpeedKmHour();
-
-		speedometer.innerHTML = (speed < 0 ? '(R) ' : '') + Math.abs(speed).toFixed(1) + ' km/h';
-
-		breakingForce = 0;
-		engineForce = 0;
-
-		if (actions.acceleration) {
-			if (speed < -1)
-				breakingForce = maxBreakingForce;
-			else engineForce = maxEngineForce;
-		}
-		if (actions.braking) {
-			if (speed > 1)
-				breakingForce = maxBreakingForce;
-			else engineForce = -maxEngineForce / 2;
-		}
-		if (actions.left) {
-			if (vehicleSteering < steeringClamp)
-				vehicleSteering += steeringIncrement;
-		}
-		else {
-			if (actions.right) {
-				if (vehicleSteering > -steeringClamp)
-					vehicleSteering -= steeringIncrement;
-			}
-			else {
-				if (vehicleSteering < -steeringIncrement)
-					vehicleSteering += steeringIncrement;
-				else {
-					if (vehicleSteering > steeringIncrement)
-						vehicleSteering -= steeringIncrement;
-					else {
-						vehicleSteering = 0;
-					}
-				}
-			}
-		}
-
-		vehicle.applyEngineForce(engineForce, BACK_LEFT);
-		vehicle.applyEngineForce(engineForce, BACK_RIGHT);
-
-		vehicle.setBrake(breakingForce / 2, FRONT_LEFT);
-		vehicle.setBrake(breakingForce / 2, FRONT_RIGHT);
-		vehicle.setBrake(breakingForce, BACK_LEFT);
-		vehicle.setBrake(breakingForce, BACK_RIGHT);
-
-		vehicle.setSteeringValue(vehicleSteering, FRONT_LEFT);
-		vehicle.setSteeringValue(vehicleSteering, FRONT_RIGHT);
-
-		var tm, p, q, i;
-		var n = vehicle.getNumWheels();
-		for (i = 0; i < n; i++) {
-			vehicle.updateWheelTransform(i, true);
-			tm = vehicle.getWheelTransformWS(i);
-			p = tm.getOrigin();
-			q = tm.getRotation();
-			wheelMeshes[i].position.set(p.x(), p.y(), p.z());
-			wheelMeshes[i].quaternion.set(q.x(), q.y(), q.z(), q.w());
-		}
-
-		//console.log(`${p.x()} ${p.y()} ${p.z()}`)
-
-		tm = vehicle.getChassisWorldTransform();
-		p = tm.getOrigin();
-		q = tm.getRotation();
-		chassisMesh.position.set(p.x(), p.y(), p.z());
-		chassisMesh.quaternion.set(q.x(), q.y(), q.z(), q.w());
+        console.warn(test + " test " + isLocalUser);
+        if (isLocalUser) {
+        		var speed = vehicle.getCurrentSpeedKmHour();
         
-        frameNum += 1;
-        if (frameNum % 30) {
-	       socket.send(JSON.stringify({
-               msgType: "PositionUpdate",
-               name: username,
-               position: {
-                   x: p.x(),
-                   y: p.y(),
-                   z: p.z()
-               },
-               rotation: {
-                   x: q.x(),
-                   y: q.y(),
-                   z: q.z(),
-                   w: q.w()
-               },
-               velocity: {
-                   x: vehicle.getForwardVector().x(),
-                   y: vehicle.getForwardVector().y(),
-                   z: vehicle.getForwardVector().z()
-               }
-           }))
+        		speedometer.innerHTML = (speed < 0 ? '(R) ' : '') + Math.abs(speed).toFixed(1) + ' km/h';
+        
+        		breakingForce = 0;
+        		engineForce = 0;
+        
+        		if (actions.acceleration) {
+        			if (speed < -1)
+        				breakingForce = maxBreakingForce;
+        			else engineForce = maxEngineForce;
+        		}
+        		if (actions.braking) {
+        			if (speed > 1)
+        				breakingForce = maxBreakingForce;
+        			else engineForce = -maxEngineForce / 2;
+        		}
+        		if (actions.left) {
+        			if (vehicleSteering < steeringClamp)
+        				vehicleSteering += steeringIncrement;
+        		}
+        		else {
+        			if (actions.right) {
+        				if (vehicleSteering > -steeringClamp)
+        					vehicleSteering -= steeringIncrement;
+        			}
+        			else {
+        				if (vehicleSteering < -steeringIncrement)
+        					vehicleSteering += steeringIncrement;
+        				else {
+        					if (vehicleSteering > steeringIncrement)
+        						vehicleSteering -= steeringIncrement;
+        					else {
+        						vehicleSteering = 0;
+        					}
+        				}
+        			}
+        		}
+        
+        		vehicle.applyEngineForce(engineForce, BACK_LEFT);
+        		vehicle.applyEngineForce(engineForce, BACK_RIGHT);
+        
+        		vehicle.setBrake(breakingForce / 2, FRONT_LEFT);
+        		vehicle.setBrake(breakingForce / 2, FRONT_RIGHT);
+        		vehicle.setBrake(breakingForce, BACK_LEFT);
+        		vehicle.setBrake(breakingForce, BACK_RIGHT);
+        
+        		vehicle.setSteeringValue(vehicleSteering, FRONT_LEFT);
+        		vehicle.setSteeringValue(vehicleSteering, FRONT_RIGHT);
+        
+        		var tm, p, q, i;
+        		var n = vehicle.getNumWheels();
+        		for (i = 0; i < n; i++) {
+        			vehicle.updateWheelTransform(i, true);
+        			tm = vehicle.getWheelTransformWS(i);
+        			p = tm.getOrigin();
+        			q = tm.getRotation();
+        			wheelMeshes[i].position.set(p.x(), p.y(), p.z());
+        			wheelMeshes[i].quaternion.set(q.x(), q.y(), q.z(), q.w());
+        		}
+        
+        		//console.log(`${p.x()} ${p.y()} ${p.z()}`)
+        
+        		tm = vehicle.getChassisWorldTransform();
+        		p = tm.getOrigin();
+        		q = tm.getRotation();
+        		chassisMesh.position.set(p.x(), p.y(), p.z());
+        		chassisMesh.quaternion.set(q.x(), q.y(), q.z(), q.w());
+                
+                frameNum += 1;
+                if (frameNum % 30) {
+        	       socket.send(JSON.stringify({
+                       msgType: "PositionUpdate",
+                       name: username,
+                       position: {
+                           x: p.x(),
+                           y: p.y(),
+                           z: p.z()
+                       },
+                       rotation: {
+                           x: q.x(),
+                           y: q.y(),
+                           z: q.z(),
+                           w: q.w()
+                       },
+                       velocity: {
+                           x: vehicle.getForwardVector().x(),
+                           y: vehicle.getForwardVector().y(),
+                           z: vehicle.getForwardVector().z()
+                       }
+                   }))
+                }
+        
+        		camera.position.set(p.x(), p.y() + 2, p.z()-4);
+        		camera.quaternion.set(q.x(), q.y(), q.z(), q.w());
+        		camera.rotateY(Math.PI);
         }
-
-		camera.position.set(p.x(), p.y() + 1, p.z());
-		camera.quaternion.set(q.x(), q.y(), q.z(), q.w());
-		camera.rotateY(Math.PI);
 	}
 
 	syncList.push(sync);
@@ -528,7 +532,13 @@ function createObjects() {
 
 		//createVehicle(new THREE.Vector3(0, 4, -20), ZERO_QUATERNION);
 		//createVehicle(new THREE.Vector3(0, 4, -40), ZERO_QUATERNION);
-		createVehicle(new THREE.Vector3(-20, 4, -97), ZERO_QUATERNION);
+
+		createVehicle(new THREE.Vector3(-20, 4, -97), ZERO_QUATERNION, true, "ME");
+
+
+        for (const [key, value] of userMap.entries()) {
+		    createVehicle(new THREE.Vector3(-25, 10, -97), ZERO_QUATERNION, false, key);
+        }
 
 		//createVehicle(new THREE.Vector3((bbox.min.x + bbox.max.x) / 2 + 5, 4, bbox.min.z), ZERO_QUATERNION);
 		// -23.06685447692871 0.4176217019557953 -97.69366455078125
