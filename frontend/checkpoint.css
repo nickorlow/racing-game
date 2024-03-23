@@ -1,0 +1,47 @@
+body {
+  color: #61443e;
+  font-family:Monospace;
+  font-size:13px;
+  text-align:center;
+
+  background-color: #bfd1e5;
+  margin: 0px;
+  overflow: hidden;
+}
+#info {
+    position: absolute;
+    top: 0px; width: 100%;
+    padding: 5px;
+}
+
+a {
+
+    color: #a06851;
+}
+
+#review {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  left: 25vw;
+  right: 25vw;
+  top: 25vh;
+  bottom: 25vh;
+  width: calc(50vw - 20px);
+  height: calc(50vh - 20px);
+  padding: 10px;
+  border-radius: 50px;
+  background-color: rgba(0.5, 0.5, 0.5, 0.5);
+  align-items: center;
+  font-family: Calibri, 'Trebuchet MS', sans-serif;
+  color: white;
+  overflow-y: scroll;
+}
+
+#review p {
+  margin-block: 0;
+}
+
+#reviewTitle {
+  font-size: 24px;
+}
