@@ -492,6 +492,7 @@ async function findRooms() {
 	console.log(data)
 }
 
+console.log("finding rooms....")
 await findRooms()
 
 async function joinLobby() {
