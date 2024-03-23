@@ -48,6 +48,7 @@ func main() {
             	log.Fatalf("Unable to marshal response : %v", err)
             }
             w.Write(respObj)
+            set_room_state(room.Id, 1);
         } else {
             http.Error(w, "Method not allowed. WOMP WOMP", http.StatusMethodNotAllowed)
         }
@@ -55,7 +56,13 @@ func main() {
    
     // Add images
     http.HandleFunc("/room/images", func(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, "Welcome to my website!")
+        if (r.Method == http.MethodPost) {
+
+
+
+        } else {
+            http.Error(w, "Method not allowed. WOMP WOMP", http.StatusMethodNotAllowed)
+        }
     })
 
 	server := &http.Server{

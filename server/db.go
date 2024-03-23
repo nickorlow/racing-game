@@ -53,3 +53,25 @@ func get_new_room(name string) pb.Room {
     return room;
 }
 
+func set_room_state(id uint32, state int32) {
+    txn := db.Txn(true)
+
+    rawRoom, err := txn.First("rooms", "id", id);
+    if err != nil {
+		panic(err)
+    }
+
+    room := rawRoom.(*pb.Room)
+
+    if err := txn.Delete("rooms", pb.Room{Id: id}); err != nil {
+		panic(err)
+	}
+
+    room.State = state
+    
+	if err := txn.Insert("rooms", room); err != nil {
+		panic(err)
+	}
+
+	txn.Commit()
+}
