@@ -5,19 +5,15 @@ import (
     "net/http"
     "fmt"
     "time"
+    "io/ioutil"
     "racer/server/pb"
+    "github.com/golang/protobuf/proto"
 )
 
 var todoList []string
 
 func main() {
-    vec := &pb.Vector{
-        X: 1.1,
-        Y: 4.2,
-        Z: 4.2,
-    }
-
-    log.Print(vec)
+    init_db();
 
 	hub := newHub()
 	go hub.run()
@@ -28,6 +24,7 @@ func main() {
 	http.HandleFunc("/ws/", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
 	})
+    
     http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
         fmt.Fprintf(w, "Welcome to my website!")
     })
@@ -37,7 +34,6 @@ func main() {
         if (r.Method == http.MethodPost) {
             roomCreation := pb.RoomCreationRequest{} 
             data, err := ioutil.ReadAll(r.Body)
-            fmt.Println("recv")
 
             if err != nil {
                 fmt.Println(err)
@@ -47,7 +43,6 @@ func main() {
                 fmt.Println(err)
             }
 
-            fmt.Println("t works!")
             fmt.Println(roomCreation)
 
             room := get_new_room(roomCreation.Name)
@@ -68,7 +63,7 @@ func main() {
     })
 
 	server := &http.Server{
-        Addr:              "localhost:8080",
+        Addr:              "0.0.0.0:8080",
 		ReadHeaderTimeout: 3 * time.Second,
 	}
 
