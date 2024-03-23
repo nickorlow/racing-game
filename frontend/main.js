@@ -131,7 +131,7 @@ Ammo().then(function(Ammo) {
 		}
 	}
 
-	function createBox(pos, quat, w, l, h, mass, friction) {
+	function createBox(pos, quat, w, l, h, mass, friction, render = true) {
 		var material = mass > 0 ? materialDynamic : materialStatic;
 		var shape = new THREE.BoxGeometry(w, l, h, 1, 1, 1);
 		var geometry = new Ammo.btBoxShape(new Ammo.btVector3(w * 0.5, l * 0.5, h * 0.5));
@@ -142,8 +142,10 @@ Ammo().then(function(Ammo) {
 		var mesh = new THREE.Mesh(shape, material);
 		mesh.position.copy(pos);
 		mesh.quaternion.copy(quat);
-		scene.add( mesh );
-
+        if (render) {
+		    scene.add( mesh );
+        }
+        
 		var transform = new Ammo.btTransform();
 		transform.setIdentity();
 		transform.setOrigin(new Ammo.btVector3(pos.x, pos.y, pos.z));
@@ -367,7 +369,7 @@ Ammo().then(function(Ammo) {
 
 	function createObjects() {
 
-		createBox(new THREE.Vector3(0, -0.5, 0), ZERO_QUATERNION, 750, 1, 750, 0, 2);
+		createBox(new THREE.Vector3(0, -0.5, 0), ZERO_QUATERNION, 750, 1, 750, 0, 2, false);
 
 		var quaternion = new THREE.Quaternion(0, 0, 0, 1);
 		quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 18);
@@ -409,7 +411,7 @@ Ammo().then(function(Ammo) {
             var kgeomlen = kgeom.length / itsz;
             var xaxis = new THREE.Vector3(1, 0, 0);
             var zaxis = new THREE.Vector3(0, 0, 1);
-            for (var i = 0; i < kgeomlen; i += 50) {
+            for (var i = 0; i < kgeomlen; i += 20) {
                 var kx = kgeom[i * 3];
                 var ky = kgeom[i * 3 + 1];
                 var kz = kgeom[i * 3 + 2];
@@ -420,7 +422,7 @@ Ammo().then(function(Ammo) {
                 kvec2.multiplyScalar(100);
                 kvec2.y += 8;
                 kvec2.z -= depth/2;
-                createBox(kvec2, ZERO_QUATERNION, size, size, size, 0, 2);
+                createBox(kvec2, ZERO_QUATERNION, size, size, size, 0, 2, false);
             }
         }, undefined, function (error) {
             console.error(error);
