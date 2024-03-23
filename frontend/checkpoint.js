@@ -221,6 +221,8 @@ Ammo().then(function(Ammo) {
 
 
 	function createObjects() {
+		const urlParams = new URLSearchParams(window.location.search);
+		console.log(urlParams.get('room_id'))
 
 		createBox(new THREE.Vector3(0, -0.5, 0), ZERO_QUATERNION, 750, 1, 750, 0, 2, false);
 
