@@ -13,10 +13,8 @@ import (
     "strings"
     "os"
     "os/exec"
-    "google.golang.org/protobuf/proto"
+    "github.com/golang/protobuf/proto"
 )
-
-var todoList []string
 
 func main() {
     init_db();
