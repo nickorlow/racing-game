@@ -5,22 +5,19 @@ import (
     "net/http"
     "fmt"
     "time"
+    "io/ioutil"
     "racer/server/pb"
+    "github.com/golang/protobuf/proto"
 )
 
 var todoList []string
 
 func main() {
-    vec := &pb.Vector{
-        X: 1.1,
-        Y: 4.2,
-        Z: 4.2,
-    }
-
-    log.Print(vec)
+    init_db();
 
 	hub := newHub()
 	go hub.run()
+
 	http.HandleFunc("/ws/", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
 	})
@@ -31,7 +28,29 @@ func main() {
 
     // Create room
     http.HandleFunc("/room", func(w http.ResponseWriter, r *http.Request) {
-        fmt.Fprintf(w, "Welcome to my website!")
+        if (r.Method == http.MethodPost) {
+            roomCreation := pb.RoomCreationRequest{} 
+            data, err := ioutil.ReadAll(r.Body)
+
+            if err != nil {
+                fmt.Println(err)
+            }
+
+            if err := proto.Unmarshal(data, &roomCreation); err != nil {
+                fmt.Println(err)
+            }
+
+            fmt.Println(roomCreation)
+
+            room := get_new_room(roomCreation.Name)
+            respObj, err := proto.Marshal(&room)
+            if err != nil {
+            	log.Fatalf("Unable to marshal response : %v", err)
+            }
+            w.Write(respObj)
+        } else {
+            http.Error(w, "Method not allowed. WOMP WOMP", http.StatusMethodNotAllowed)
+        }
     })
    
     // Add images
