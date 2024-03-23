@@ -5,10 +5,10 @@ option go_package = "/pb";
 package racer;
 
 enum RoomState {
-    LOBBY   = 0;   // Lobby is joinable, people can change cars/names
-    RACING  = 1;  // Lobby is currently racing. Cannot be joined
-    RESULTS = 2; // Lobby is displaying results (race is over)
-    DEAD    = 3;     // Lobby has been destroyed, clients should redirect to home
+    LOBBY,   // Lobby is joinable, people can change cars/names
+    RACING,  // Lobby is currently racing. Cannot be joined
+    RESULTS, // Lobby is displaying results (race is over)
+    DEAD     // Lobby has been destroyed, clients should redirect to home
 }
 
 message RoomStateChange {
