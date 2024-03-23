@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+option go_package = "/pb";
+
+package racer;
+
+enum RoomState {
+    CREATING   = 0;   // Lobby is newly created. in this state until map generated 
+    LOBBY      = 1;   // Lobby is joinable, people can change cars/names
+    RACING     = 2;  // Lobby is currently racing. Cannot be joined
+    RESULTS    = 3; // Lobby is displaying results (race is over)
+    DEAD       = 4;     // Lobby has been destroyed, clients should redirect to home
+}
+
+message RoomStateChange {
+    RoomState new_state = 1;
+}
+
+
+message RoomCreationRequest {
+    string name = 1;
+}
+
+message Room {
+    uint32       id = 1;
+    RoomState state = 2;
+    string     name = 3;
+}
+
+message RacerInfo {
+    uint32           id = 1;
+    string         name = 2;
+    uint32 car_model_id = 3;
+}
+
+message CheckpointReport {
+    uint32  racer_id       = 1;
+    uint32  checkpoint_num = 2;
+}
+
+message PositionUpdate {
+    Position position  = 1;
+    Vector   vector    = 2;
+    uint32   racer_id  = 3;
+}
+
+message Position {
+    double x = 1;
+    double y = 2;
+    double z = 3;
+}
+
+message Vector {
+    double x = 1;
+    double y = 2;
+    double z = 3;
+}
