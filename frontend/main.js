@@ -9,6 +9,7 @@ const submitUsernameButton = document.getElementById("submitUsername")
 const usernameInput = document.getElementById("usernameInput")
 const usernameDiv = document.getElementById("usernameDiv")
 const gameInfoDiv = document.getElementById("gameInfo")
+const racerList = document.getElementById("racers")
 gameInfoDiv.style.display = "none"
 const makeLobbyButton = document.getElementById("makeLobby")
 const makeLobbyDiv = document.getElementById("makeLobbyDiv")
@@ -563,6 +564,7 @@ function socketMessageHandler(e) {
                     name: username
                 }))
                 userMap.set(newUsername, "idk"); /* can store user's car model or smth here */
+				racerList.innerText = [username, ...userMap.keys()].join(', ')
             }
             break;
         case "RoomStateChange":
@@ -599,7 +601,7 @@ async function joinRoom(room) {
 		gameInfoDiv.style.display = "flex"
 		const gameName = document.createElement("p")
 		gameName.innerText = room.name
-		gameInfoDiv.insertBefore(gameName, startGameButton)
+		gameInfoDiv.insertBefore(gameName, racerList)
 		existingRoomsDiv.style.display = "none"
 
         waitForSocketConnection(socket, function(){
@@ -682,7 +684,7 @@ async function makeLobby() {
 		gameInfoDiv.style.display = "flex"
 		const gameName = document.createElement("p")
 		gameName.innerText = name
-		gameInfoDiv.insertBefore(gameName, startGameButton)
+		gameInfoDiv.insertBefore(gameName, racerList)
 
 	} catch (e) {
 		console.error(e);
