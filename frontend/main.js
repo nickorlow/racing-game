@@ -681,8 +681,7 @@ function waitForSocketConnection(socket, callback){
 
 async function joinRoom(room) {
 	if (username.length > 0) {
-		roomID = room.id
-		socket = new WebSocket(`ws://localhost:8080/ws/${room.id}`)
+		socket = new WebSocket(`wss://able-willingly-moose.ngrok-free.app/ws/${room.id}`)
 		socket.onmessage = socketMessageHandler
 		makeLobbyDiv.style.display = "none"
 		gameInfoDiv.style.display = "flex"
@@ -709,7 +708,7 @@ async function joinRoom(room) {
 
 
 async function findRooms() {
-	const res = await fetch("http://localhost:8080/rooms")
+	const res = await fetch("https://able-willingly-moose.ngrok-free.app/rooms")
 	const data = await res.json()
 	if (data && Array.isArray(data) && data.length > 0) {
 		const header = document.createElement("p")
@@ -763,8 +762,7 @@ async function makeLobby() {
 		///const ntype = root.lookupType("Room");
 				
 		const data = await response.json()
-		socket = new WebSocket(`ws://localhost:8080/ws/${data.id}`)
-		roomID = data.id
+		socket = new WebSocket(`wss://able-willingly-moose.ngrok-free.app/ws/${data.id}`)
 		socket.onmessage = socketMessageHandler
 	  
 		makeLobbyDiv.style.display = "none"
