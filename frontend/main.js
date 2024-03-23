@@ -5,7 +5,15 @@ import { PCDLoader } from 'three/addons/loaders/PCDLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 const startGameButton = document.getElementById("startButton")
-const joinLobbyButton = document.getElementById("joinLobby")
+const submitUsernameButton = document.getElementById("submitUsername")
+const usernameInput = document.getElementById("usernameInput")
+const usernameDiv = document.getElementById("usernameDiv")
+const makeLobbyButton = document.getElementById("makeLobby")
+
+makeLobbyButton.style.display = "none"
+startGameButton.style.display = "none"
+let username = ""
+
 const startGameDiv = document.getElementById("startPopup")
 const container = document.getElementById( 'container' );
 const speedometer = document.getElementById( 'speedometer' );
@@ -20,7 +28,22 @@ startGameButton.onclick = () => {
     }))
 	sendIt()
 }
-joinLobbyButton.onclick = joinLobby
+makeLobbyButton.onclick = makeLobby
+
+
+function submitUsernameAction() {
+	if (usernameInput.value.length > 0) {
+		findRooms()
+		makeLobbyButton.style.display = "inline-block"
+		startGameButton.style.display = "inline-block"
+		usernameDiv.style.display = "none"
+		username = usernameInput.value
+		console.log(username)
+
+	}
+}
+
+submitUsernameButton.onclick = submitUsernameAction
 
 //async function spinUp() {
 	//container.setAttribute("hidden", false)
@@ -48,7 +71,6 @@ var physicsWorld;
 var syncList = [];
 var time = 0;
 var frameNum = 0;
-var username = "nick";
 
 // Keybord actions
 var actions = {};
@@ -530,10 +552,10 @@ function sendIt() {
 
 function socketMessageHandler(e) {
 	console.log(e.data)
-    msgObj = JSON.parse(e.data)
+    let msgObj = JSON.parse(e.data)
     switch (msgObj.msgType) {
         case "RacerInfo":
-            newUsername = msgObj. name
+            let newUsername = msgObj. name
             if (!userMap.has(newUsername)) {
 	            socket.send(JSON.stringify({
                     msgType: "RacerInfo",
@@ -552,31 +574,51 @@ function socketMessageHandler(e) {
     }
 }
 
+function waitForSocketConnection(socket, callback){
+    setTimeout(
+        function () {
+            if (socket.readyState === 1) {
+                console.log("Connection is made")
+                if (callback != null){
+                    callback();
+                }
+            } else {
+                console.log("wait for connection...")
+                waitForSocketConnection(socket, callback);
+            }
+
+        }, 5); // wait 5 milisecond for the connection...
+}
 
 async function joinRoom(roomID) {
     if (username.length > 0) {
 	    socket = new WebSocket(`ws://localhost:8080/ws/${roomID}`)
 	    socket.onmessage = socketMessageHandler
 
-	    socket.send(JSON.stringify({
-            msgType: "RacerInfo",
-            name: username
-        }))
+        waitForSocketConnection(socket, function(){
+	        socket.send(JSON.stringify({
+                msgType: "RacerInfo",
+                name: username
+            }))
 
-        joinLobbyButton.disabled = true
-	    startGameButton.disabled = false
-	    existingRoomsDiv.style.display = "none"
+	        makeLobbyButton.style.display = "none"
+	        startGameButton.disabled = false
+	        existingRoomsDiv.style.display = "none"
+        });
+
     } else {
         alert("Please enter a username");
     }
-
 }
 
 
 async function findRooms() {
 	const res = await fetch("http://localhost:8080/rooms")
 	const data = await res.json()
-	if (data && Array.isArray(data)) {
+	if (data && Array.isArray(data) && data.length > 0) {
+		const header = document.createElement("p")
+		header.innerText = "Existing Rooms"
+		existingRoomsDiv.appendChild(header)
 		for (const room of data) {
 			const roomDesc = document.createElement("div")
 			roomDesc.classList.add("roomDesc")
@@ -592,9 +634,8 @@ async function findRooms() {
 	}
 }
 
-await findRooms()
 
-async function joinLobby() {
+async function makeLobby() {
 	var payload = {name: "hi"};
     //var type = root.lookupType("RoomCreationRequest");
     //var msg = type.create(payload);
@@ -626,7 +667,8 @@ async function joinLobby() {
 		socket = new WebSocket(`ws://localhost:8080/ws/${data.id}`)
 		socket.onmessage = socketMessageHandler
 	  
-		joinLobbyButton.disabled = true
+		makeLobbyButton.style.display = "none"
+		existingRoomsDiv.style.display = "none"
 		startGameButton.disabled = false
 
 	} catch (e) {
