@@ -72,11 +72,6 @@ func main() {
 	http.HandleFunc("/room", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(("Received room creation request"))
 
-		//create public/rooms folder if it doesn't exist
-		if _, err := os.Stat("../frontend/public/rooms"); os.IsNotExist(err) {
-			os.Mkdir("../frontend/public/rooms", 0700)
-		}
-
 		if r.Method == http.MethodPost {
 			roomCreation := pb.RoomCreationRequest{}
 			data, err := ioutil.ReadAll(r.Body)
@@ -158,15 +153,6 @@ func main() {
 			cmd := exec.Command("python3", "../scene_recreation/run_dust3r.py", "--images_folder", dname, "--dust3r_path", "../scene_recreation/dust3r", "--out_dir", dnameobj, "--id", "0")
 			out, err := cmd.CombinedOutput()
 			log.Println(string(out))
-
-			//copy obj folder to public/room/room_id using go
-			fmt.Printf("Copying %s to %s\n", dnameobj, "../frontend/public/rooms/"+strconv.FormatUint(uint64(room_id_32), 10))
-			cp_cmd := exec.Command("cp", "-r", dnameobj, "../frontend/public/rooms/"+strconv.FormatUint(uint64(room_id_32), 10))
-			err = cp_cmd.Run()
-			if err != nil {
-				http.Error(w, "Couldn't copy mesh to public folder", http.StatusInternalServerError)
-				return
-			}
 
 			set_room_state(room_id_32, pb.RoomState_LOBBY)
 			hub.broadcast <- Envelope{message: []byte("LBY"), sender_id: 0, room_id: room_id_32}

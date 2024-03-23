@@ -230,7 +230,7 @@ Ammo().then(function(Ammo) {
 		quaternion.setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 18);
 
         const gltfloader = new GLTFLoader();
-        gltfloader.load('public/mesh2.glb', function (gltf) {
+        gltfloader.load(`/room/mesh_map/${urlParams.get('room_id')}`, function (gltf) {
             const color = 0xFFFFFF;
             const intensity = 10;
             const light = new THREE.DirectionalLight(color, intensity);

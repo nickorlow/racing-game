@@ -2,3 +2,5 @@ frontend/node_modules
 repo.tar.gz
 frontend/.vite
 frontend/public
+server/images_*
+server/obj_*
