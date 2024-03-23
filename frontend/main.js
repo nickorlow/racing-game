@@ -357,10 +357,9 @@ Ammo().then(function(Ammo) {
 			chassisMesh.position.set(p.x(), p.y(), p.z());
 			chassisMesh.quaternion.set(q.x(), q.y(), q.z(), q.w());
 
-            camera.position.x = p.x();
-            camera.position.y = p.y() + 0.2;
-            camera.position.z = p.z();
-            camera.quaternion.set(-q.x(), q.y(), q.z(), q.w());
+            camera.position.set(p.x(), p.y() + 1, p.z());
+            camera.quaternion.set(q.x(), q.y(), q.z(), q.w());
+            camera.rotateY(Math.PI);
 		}
 
 		syncList.push(sync);
