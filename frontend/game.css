@@ -59,10 +59,15 @@ a {
   justify-content: flex-start;
 }
 
-#existingRooms p {
+#startPopup p {
   margin-block: 0;
 }
 
 .roomDesc {
   margin: 0.5em 0;
+}
+
+#gameInfo {
+  display: flex;
+  flex-direction: column;
 }
