@@ -13,10 +13,8 @@ import (
     "strings"
     "os"
     "os/exec"
-    "google.golang.org/protobuf/proto"
+    "github.com/golang/protobuf/proto"
 )
-
-var todoList []string
 
 func main() {
     init_db();
@@ -24,6 +22,9 @@ func main() {
 	hub := newHub()
 	go hub.run()
 
+	fs := http.FileServer(http.Dir("/k/sv/racing-game/frontend"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
+	
 	http.HandleFunc("/ws/", func(w http.ResponseWriter, r *http.Request) {
 		serveWs(hub, w, r)
 	})
@@ -54,6 +55,7 @@ func main() {
             if err != nil {
             	log.Fatalf("Unable to marshal response : %v", err)
             }
+			fmt.Println(respObj)
             w.Write(respObj)
         } else {
             http.Error(w, "Method not allowed. WOMP WOMP", http.StatusMethodNotAllowed)

@@ -8,3 +8,6 @@ deploy: make-tar
 	scp -r repo.tar.gz nickorlow@media-wawa.nickorlow.com:~/server_files && \
 	ssh nickorlow@media-wawa.nickorlow.com -f "cd ~/server_files && tar xzf repo.tar.gz && cd ./infra && docker compose up -d --build" && \
 	rm -rf repo.tar.gz > /dev/null
+
+local:
+	cd ./infra && docker compose stop && docker compose up -d --build
