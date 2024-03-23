@@ -172,7 +172,7 @@ def main():
             images = load_images(file_list[start_idx:end_idx], size=512)
         else:
             images = load_images([file_list[0]] + file_list[start_idx:end_idx], size=512)
-        #print("3")
+
         print("num images:", len(images))
 
         print(start_idx, end_idx, len(depths_unormalized), num_depths)
@@ -216,8 +216,6 @@ def main():
             meshes.append(pts3d_to_trimesh(imgs_curr[i], pts3d_unconcat[i], mask[i]))
         mesh = trimesh.Trimesh(**cat_meshes(meshes))
         trimesh_scene_mesh.add_geometry(mesh)
-
-        o3d_mesh = mesh.as_open3d
 
         plane_estimation_result = plane_estimation(points=pts3d_curr, colors=col_curr)
         T_xy_plane_align = estimate_rotation(plane_estimation_result["plane_model"], z_up=False)

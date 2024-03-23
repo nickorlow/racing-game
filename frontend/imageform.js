@@ -72,14 +72,81 @@ function returnFileSize(number) {
 const button = document.getElementById("submitButton");
 button.addEventListener("click", async (e) => {
   e.preventDefault();
+
+  //creating a room
+  let roomName = "hi";
+  var payload = {name: roomName, balls: "balls"};
+  // fetch('/room', {
+  //   method: "POST", // *GET, POST, PUT, DELETE, etc.
+  //   mode: "cors", // no-cors, *cors, same-origin
+  //   cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+  //   credentials: "same-origin", // include, *same-origin, omit
+  //   headers: {
+  //       "Content-Type": "application/json",
+  //       "Access-Control-Allow-Origin": "*"
+  //   },
+  //   body: JSON.stringify(payload) // buf, // body data type must match "Content-Type" header
+  // }).then(function (response) {
+  //   response.text().then(t => {
+  //       console.log(t)
+  //   });
+  // }).catch(function (e) {
+  //   console.error(e);
+  // });
+
+  const resp = await fetch('/room', {
+      method: "POST", // *GET, POST, PUT, DELETE, etc.
+      mode: "cors", // no-cors, *cors, same-origin
+      cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+      credentials: "same-origin", // include, *same-origin, omit
+      headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*"
+      },
+      body: JSON.stringify(payload) // buf, // body data type must match "Content-Type" header
+  })
+  const resp_json = await resp.json()
+  console.log("RESPONSE " + JSON.stringify(resp_json));
+  console.log("RESPONSE " + resp_json["name"]);
+
+
   let imageSources = Array.from(preview.children).map(e => e.lastChild.src)
   let blobs = []
+  let formData = new FormData();
+
+  let i = 0;
   for (const imageSource of imageSources) {
+    console.log(imageSource)
     let res = await fetch(imageSource)
     let blob = await res.blob()
+    formData.append('image_uploads', blob, `image${i}.jpg`);
     blobs.push(blob)
+    i += 1
   }
   console.log(blobs)
-  preview.innerHTML = ""
-  uploadStatus.innerText = "Image uploaded!"
+  // preview.innerHTML = ""
+  // uploadStatus.innerText = "Image uploaded!"
+
+  console.log("Sending form data to server with data: ", formData.entries().next())
+  // Send FormData to the server
+  fetch('/room/images/' + resp_json["id"], {
+    method: 'POST',
+    body: formData
+  })
+  .then(response => {
+    if (!response.ok) {
+      console.log(response.text());
+      throw new Error('Network response was not ok');
+    }
+    return response.text();
+  })
+  .then(data => {
+    console.log(data);
+    preview.innerHTML = "";
+    uploadStatus.innerText = "Image uploaded!";
+  })
+  .catch(error => {
+    console.error('There was a problem with the fetch operation:', error);
+  });
+
 });
