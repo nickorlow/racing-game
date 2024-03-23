@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+option go_package = "/pb";
+
+package racer;
+
+message PositionUpdate {
+    Position position = 1;
+    Vector   vector   = 2;
+    uint32   user_id  = 3;
+    uint32   room_id  = 4;
+}
+
+message Position {
+    double x = 1;
+    double y = 2;
+    double z = 3;
+}
+
+message Vector {
+    double x = 1;
+    double y = 2;
+    double z = 3;
+}
