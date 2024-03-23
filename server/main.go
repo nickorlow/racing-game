@@ -23,7 +23,7 @@ func main() {
 	hub := newHub()
 	go hub.run()
 
-	fs := http.FileServer(http.Dir("/k/sv/tmp2"))
+	fs := http.FileServer(http.Dir("../frontend"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	
 	http.HandleFunc("/ws/", func(w http.ResponseWriter, r *http.Request) {
