@@ -8,10 +8,13 @@ const startGameButton = document.getElementById("startButton")
 const submitUsernameButton = document.getElementById("submitUsername")
 const usernameInput = document.getElementById("usernameInput")
 const usernameDiv = document.getElementById("usernameDiv")
+const gameInfoDiv = document.getElementById("gameInfo")
+const racerList = document.getElementById("racers")
+gameInfoDiv.style.display = "none"
 const makeLobbyButton = document.getElementById("makeLobby")
-
-makeLobbyButton.style.display = "none"
-startGameButton.style.display = "none"
+const makeLobbyDiv = document.getElementById("makeLobbyDiv")
+const makeLobbyInput = document.getElementById("lobbyInput")
+makeLobbyDiv.style.display = "none"
 let username = ""
 
 const startGameDiv = document.getElementById("startPopup")
@@ -34,8 +37,7 @@ makeLobbyButton.onclick = makeLobby
 function submitUsernameAction() {
 	if (usernameInput.value.length > 0) {
 		findRooms()
-		makeLobbyButton.style.display = "inline-block"
-		startGameButton.style.display = "inline-block"
+		makeLobbyDiv.style.display = "flex"
 		usernameDiv.style.display = "none"
 		username = usernameInput.value
 		console.log(username)
@@ -572,6 +574,7 @@ function socketMessageHandler(e) {
                     name: username
                 }))
                 userMap.set(newUsername, "idk"); /* can store user's car model or smth here */
+				racerList.innerText = [username, ...userMap.keys()].join(', ')
             }
             break;
         case "RoomStateChange":
@@ -600,10 +603,16 @@ function waitForSocketConnection(socket, callback){
         }, 5); // wait 5 milisecond for the connection...
 }
 
-async function joinRoom(roomID) {
-    if (username.length > 0) {
-	    socket = new WebSocket(`ws://localhost:8080/ws/${roomID}`)
-	    socket.onmessage = socketMessageHandler
+async function joinRoom(room) {
+	if (username.length > 0) {
+		socket = new WebSocket(`ws://localhost:8080/ws/${room.id}`)
+		socket.onmessage = socketMessageHandler
+		makeLobbyDiv.style.display = "none"
+		gameInfoDiv.style.display = "flex"
+		const gameName = document.createElement("p")
+		gameName.innerText = room.name
+		gameInfoDiv.insertBefore(gameName, racerList)
+		existingRoomsDiv.style.display = "none"
 
         waitForSocketConnection(socket, function(){
 	        socket.send(JSON.stringify({
@@ -635,7 +644,7 @@ async function findRooms() {
 			const roomText = document.createElement("p")
 			roomText.innerText = `${room.name} ${room.id}`
 			const roomSelector = document.createElement("button")
-			roomSelector.onclick = () => joinRoom(room.id)
+			roomSelector.onclick = () => joinRoom(room)
 			roomSelector.innerText = "Select"
 			roomDesc.appendChild(roomText)
 			roomDesc.appendChild(roomSelector)
@@ -646,7 +655,10 @@ async function findRooms() {
 
 
 async function makeLobby() {
-	var payload = {name: "hi"};
+	const name = makeLobbyInput.value
+	if (name.length === 0) return;
+
+	var payload = {name};
     //var type = root.lookupType("RoomCreationRequest");
     //var msg = type.create(payload);
     //var buf = type.encode(msg).finish();
@@ -677,9 +689,12 @@ async function makeLobby() {
 		socket = new WebSocket(`ws://localhost:8080/ws/${data.id}`)
 		socket.onmessage = socketMessageHandler
 	  
-		makeLobbyButton.style.display = "none"
+		makeLobbyDiv.style.display = "none"
 		existingRoomsDiv.style.display = "none"
-		startGameButton.disabled = false
+		gameInfoDiv.style.display = "flex"
+		const gameName = document.createElement("p")
+		gameName.innerText = name
+		gameInfoDiv.insertBefore(gameName, racerList)
 
 	} catch (e) {
 		console.error(e);
