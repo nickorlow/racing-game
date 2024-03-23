@@ -24,7 +24,10 @@ const existingRoomsDiv = document.getElementById("existingRooms")
 let socket = null
 //container.setAttribute("hidden", true)
 startGameButton.onclick = () => {
-	socket.send("Starting game")
+	socket.send(JSON.stringify({
+        msgType: "RoomStateChange",
+        newState: "RACING"
+    }))
 	sendIt()
 }
 makeLobbyButton.onclick = makeLobby
@@ -68,6 +71,7 @@ var physicsWorld;
 
 var syncList = [];
 var time = 0;
+var frameNum = 0;
 
 // Keybord actions
 var actions = {};
@@ -77,6 +81,8 @@ var keysActions = {
 	"KeyA":'left',
 	"KeyD":'right'
 };
+
+const userMap = new Map();
 
 // - Functions -
 
@@ -392,6 +398,7 @@ function createVehicle(pos, quat) {
 			wheelMeshes[i].position.set(p.x(), p.y(), p.z());
 			wheelMeshes[i].quaternion.set(q.x(), q.y(), q.z(), q.w());
 		}
+
 		//console.log(`${p.x()} ${p.y()} ${p.z()}`)
 
 		tm = vehicle.getChassisWorldTransform();
@@ -399,6 +406,30 @@ function createVehicle(pos, quat) {
 		q = tm.getRotation();
 		chassisMesh.position.set(p.x(), p.y(), p.z());
 		chassisMesh.quaternion.set(q.x(), q.y(), q.z(), q.w());
+        
+        frameNum += 1;
+        if (frameNum % 30) {
+	       socket.send(JSON.stringify({
+               msgType: "PositionUpdate",
+               name: username,
+               position: {
+                   x: p.x(),
+                   y: p.y(),
+                   z: p.z()
+               },
+               rotation: {
+                   x: q.x(),
+                   y: q.y(),
+                   z: q.z(),
+                   w: q.w()
+               },
+               velocity: {
+                   x: vehicle.getForwardVector().x(),
+                   y: vehicle.getForwardVector().y(),
+                   z: vehicle.getForwardVector().z()
+               }
+           }))
+        }
 
 		camera.position.set(p.x(), p.y() + 1, p.z());
 		camera.quaternion.set(q.x(), q.y(), q.z(), q.w());
@@ -522,22 +553,69 @@ function sendIt() {
 
 function socketMessageHandler(e) {
 	console.log(e.data)
-	if (e.data === "Starting game") {
-		sendIt()
-	}
+    let msgObj = JSON.parse(e.data)
+    switch (msgObj.msgType) {
+        case "RacerInfo":
+            let newUsername = msgObj. name
+            if (!userMap.has(newUsername)) {
+	            socket.send(JSON.stringify({
+                    msgType: "RacerInfo",
+                    name: username
+                }))
+                userMap.set(newUsername, "idk"); /* can store user's car model or smth here */
+            }
+            break;
+        case "RoomStateChange":
+            switch (msgObj.newState) {
+                case "RACING":
+                    sendIt();
+                    break;
+            }
+            break;
+    }
 }
 
+function waitForSocketConnection(socket, callback){
+    setTimeout(
+        function () {
+            if (socket.readyState === 1) {
+                console.log("Connection is made")
+                if (callback != null){
+                    callback();
+                }
+            } else {
+                console.log("wait for connection...")
+                waitForSocketConnection(socket, callback);
+            }
+
+        }, 5); // wait 5 milisecond for the connection...
+}
 
 async function joinRoom(room) {
-	socket = new WebSocket(`ws://localhost:8080/ws/${room.id}`)
-	socket.onmessage = socketMessageHandler
-	makeLobbyDiv.style.display = "none"
-	gameInfoDiv.style.display = "flex"
-	const gameName = document.createElement("p")
-	gameName.innerText = room.name
-	gameInfoDiv.insertBefore(gameName, startGameButton)
-	existingRoomsDiv.style.display = "none"
+	if (username.length > 0) {
+		socket = new WebSocket(`ws://localhost:8080/ws/${room.id}`)
+		socket.onmessage = socketMessageHandler
+		makeLobbyDiv.style.display = "none"
+		gameInfoDiv.style.display = "flex"
+		const gameName = document.createElement("p")
+		gameName.innerText = room.name
+		gameInfoDiv.insertBefore(gameName, startGameButton)
+		existingRoomsDiv.style.display = "none"
 
+        waitForSocketConnection(socket, function(){
+	        socket.send(JSON.stringify({
+                msgType: "RacerInfo",
+                name: username
+            }))
+
+	        makeLobbyButton.style.display = "none"
+	        startGameButton.disabled = false
+	        existingRoomsDiv.style.display = "none"
+        });
+
+    } else {
+        alert("Please enter a username");
+    }
 }
 
 
