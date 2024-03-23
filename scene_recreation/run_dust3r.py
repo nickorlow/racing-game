@@ -230,6 +230,11 @@ def main():
 
         np.save(os.path.join(args.out_dir, f"pts3d.npy"), np.asarray(pcd.points))
         np.save(os.path.join(args.out_dir, f"colors.npy"), np.asarray(pcd.colors))
+        [a,b,c,d] = plane_estimation_result["plane_model"]
+        f = open(os.path.join(args.out_dir, f"plane.txt"), "a")
+        f.write(f'{a} {b} {c} {d}')
+        f.close()
+
 
         outdir = args.out_dir
         #pcd_outfile = os.path.join(outdir, 'pcd.glb')

@@ -535,7 +535,7 @@ function createObjects() {
 	*/
 
 	const pcdloader = new PCDLoader();
-	pcdloader.load(`/public/pcd_downsampled.pcd`, function (points) {
+	pcdloader.load(`/static/public/pcd_downsampled.pcd`, function (points) {
 		//console.log(points);
 		var kvec = new THREE.Vector3(100, 100, 100);
 		points.scale.copy(kvec);
@@ -579,7 +579,7 @@ function createObjects() {
 	});
 
 	const gltfloader = new GLTFLoader();
-	gltfloader.load(`/public/mesh2.glb`, function (gltf) {
+	gltfloader.load(`/static/public/mesh2.glb`, function (gltf) {
 		const color = 0xFFFFFF;
 		const intensity = 10;
 		const light = new THREE.DirectionalLight(color, intensity);
@@ -682,7 +682,7 @@ function waitForSocketConnection(socket, callback){
 async function joinRoom(room) {
 	if (username.length > 0) {
 		roomID = room.id
-		socket = new WebSocket(`wss://able-willingly-moose.ngrok-free.app/ws/${room.id}`)
+		socket = new WebSocket(`ws://localhost:8080/ws/${room.id}`)
 		socket.onmessage = socketMessageHandler
 		makeLobbyDiv.style.display = "none"
 		gameInfoDiv.style.display = "flex"
@@ -709,7 +709,7 @@ async function joinRoom(room) {
 
 
 async function findRooms() {
-	const res = await fetch("https://able-willingly-moose.ngrok-free.app/rooms")
+	const res = await fetch("http://localhost:8080/rooms")
 	const data = await res.json()
 	if (data && Array.isArray(data) && data.length > 0) {
 		const header = document.createElement("p")
@@ -765,7 +765,7 @@ async function makeLobby() {
 		const data = await response.json()
 
 		roomID = data.id
-		socket = new WebSocket(`wss://able-willingly-moose.ngrok-free.app/ws/${data.id}`)
+		socket = new WebSocket(`ws://localhost:8080/ws/${data.id}`)
 		socket.onmessage = socketMessageHandler
 	  
 		makeLobbyDiv.style.display = "none"
