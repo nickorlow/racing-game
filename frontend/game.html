@@ -3,36 +3,7 @@
       <title>Ammo.js Raycast vehicle demo</title>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-      <style>
-          body {
-              color: #61443e;
-              font-family:Monospace;
-              font-size:13px;
-              text-align:center;
-
-              background-color: #bfd1e5;
-              margin: 0px;
-              overflow: hidden;
-          }
-    #speedometer {
-      color: #ffffff;
-      background-color: #990000;
-      position: absolute;
-      bottom: 0px;
-      padding: 5px;
-    }
-          #info {
-              position: absolute;
-              top: 0px; width: 100%;
-              padding: 5px;
-          }
-
-          a {
-
-              color: #a06851;
-          }
-
-      </style>
+      <link rel="stylesheet" href="game.css">
       <script type="importmap">
         {
             "imports": {
@@ -43,10 +14,13 @@
       </script>
   </head>
   <body>
-      <div id="container"><br /><br /><br /><br /><br />Loading...</div>
-  <div id="speedometer">0.0 km/h</div>
-      <div id="info">Ammo.js Raycast vehicle demo<br>Press W,A,S,D to move.</div>
-  <script src="ammo.js"></script>
-      <script type="module" src="main.js"></script>
+    <div id="startPopup">
+      <button id="joinLobby">Make Lobby</button>
+      <button id="startButton">Start Game</button>
+    </div>
+    <div id="container"><br /><br /><br /><br /><br />Tabletop Cars</div>
+    <div id="speedometer">0.0 km/h</div>
+    <script src="ammo.js"></script>
+    <script type="module" src="main.js"></script>
   </body>
 </html>
