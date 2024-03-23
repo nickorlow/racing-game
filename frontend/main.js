@@ -95,7 +95,7 @@ yloader.load('public/mesh_aligned.ply', function (p) {
 */
 
 var motioncst = 0.01;
-var navmode = "flying";
+var navmode = "driving";
 var dirvec = new THREE.Vector3(0, 0, -1);
     
 if (navmode == "flying") {
@@ -146,7 +146,8 @@ if (navmode == "flying") {
         camera.position.z += (motioncst * dirvec.z);
     };
     var handleA = function () {
-        dirvec.applyAxisAngle(new THREE.Vector3(0, 1, 0), -2);
+        dirvec.applyAxisAngle(new THREE.Vector3(0, 1, 0), motioncst);
+        camera.rotateY(motioncst);
         console.log(dirvec);
     };
     var handleS = function () {
@@ -156,7 +157,8 @@ if (navmode == "flying") {
         camera.position.z -= (motioncst * dirvec.z);
     };
     var handleD = function () {
-        dirvec.applyAxisAngle(new THREE.Vector3(0, 1, 0), 2);
+        dirvec.applyAxisAngle(new THREE.Vector3(0, 1, 0), -motioncst);
+        camera.rotateY(-motioncst);
         console.log(dirvec);
     };
     var handleZ = function () {
