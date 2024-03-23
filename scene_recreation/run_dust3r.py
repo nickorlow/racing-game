@@ -117,6 +117,8 @@ def main():
     parser.add_argument("--images_folder", type=str, default="./futo")
     parser.add_argument("--dust3r_path", type=str, default="./dust3r")
     parser.add_argument("--out_dir", type=str, default="./pcds_and_meshes")
+    parser.add_argument("--id", type=int)
+
     args = parser.parse_args()
 
     if not os.path.exists(args.out_dir):
@@ -231,11 +233,11 @@ def main():
 
         outdir = args.out_dir
         #pcd_outfile = os.path.join(outdir, 'pcd.glb')
-        mesh_outfile = os.path.join(outdir, 'mesh.glb')
+        mesh_outfile = os.path.join(outdir, f'mesh{args.id}.glb')
         #trimesh_scene_pcd.export(file_obj=pcd_outfile)
         trimesh_scene_mesh.export(file_obj=mesh_outfile)
-        o3d.io.write_point_cloud(os.path.join(outdir, 'pcd.pcd'), pcd)
-        print('(exporting 3D scene to', os.path.join(outdir, 'pcd.pcd'), "," , mesh_outfile,')')
+        o3d.io.write_point_cloud(os.path.join(outdir, f'pcd{args.id}.pcd'), pcd)
+        print('(exporting 3D scene to', os.path.join(outdir, f'pcd{args.id}.pcd'), "," , mesh_outfile,')')
 
 
         #if end_idx >= len(file_list):
